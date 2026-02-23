@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talent Review | Sam's Club</title>
+    <style>
+        :root {
+            --primary-blue: #0062AD;
+            --sapphire-blue: #00358E;
+            --midnight-blue: #11224B;
+            --ux-blue: #1D4B6D;
+            --tropical-blue: #35C4EC;
+            --sky-blue: #97EAFF;
+            --pool-blue: #42DFE0;
+            --mid-gray: #7C878E;
+            --light-gray: #D0D3D4;
+            --gray-text: #6B7280;
+            --border-gray: #D1D5DB;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --accent-seaglass: #06ACB2;
+            --accent-magenta: #D946EF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Aktiv Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f9fafb;
+            color: var(--gray-text);
+            line-height: 1.6;
+        }
+
+        /* Layout */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--ux-blue) 100%);
+            color: white;
+            padding: 32px;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-title {
+            flex: 1;
+        }
+
+        .header-title h1 {
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: 0;
+            margin-bottom: 8px;
+        }
+
+        .header-title p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .associate-info {
+            font-size: 13px;
+            text-align: right;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        /* Controls Section */
+        .controls-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+            border: 1px solid var(--border-gray);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .controls-header {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--midnight-blue);
+            margin-bottom: 16px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        /* Form Inputs */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--midnight-blue);
+            margin-bottom: 8px;
+            text-transform: none;
+        }
+
+        .form-input,
+        .form-select {
+            padding: 10px 12px;
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--gray-text);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px var(--pool-blue), inset 0 0 0 3px var(--pool-blue);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 9999px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn--primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn--primary:hover {
+            background-color: var(--sapphire-blue);
+        }
+
+        .btn--primary:focus {
+            outline: 3px solid var(--pool-blue);
+            outline-offset: 2px;
+        }
+
+        .btn--secondary {
+            background-color: var(--light-gray);
+            color: var(--midnight-blue);
+        }
+
+        .btn--secondary:hover {
+            background-color: #bcc0c3;
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card */
+        .card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border-gray);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .card__header {
+            background-color: #f3f4f6;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .card__header h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--midnight-blue);
+            margin: 0;
+        }
+
+        .card__body {
+            padding: 24px;
+        }
+
+        .card__footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-gray);
+            background-color: #fafbfc;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .table thead {
+            background-color: #f3f4f6;
+        }
+
+        .table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--midnight-blue);
+            border-bottom: 2px solid var(--border-gray);
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .table th:hover {
+            background-color: #e5e7eb;
+        }
+
+        .table th.sortable::after {
+            content: " ↕";
+            opacity: 0.5;
+            font-size: 12px;
+        }
+
+        .table th.sort-asc::after {
+            content: " ↑";
+            opacity: 1;
+        }
+
+        .table th.sort-desc::after {
+            content: " ↓";
+            opacity: 1;
+        }
+
+        .table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        /* Rating Badge */
+        .rating-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .rating-high-potential {
+            background-color: var(--accent-magenta);
+        }
+
+        .rating-valued-contributor {
+            background-color: var(--primary-blue);
+        }
+
+        .rating-subject-matter-expert {
+            background-color: var(--success-green);
+        }
+
+        .rating-talent-risk {
+            background-color: var(--error-red);
+        }
+
+        /* Chart Container */
+        .chart-placeholder {
+            height: 300px;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--mid-gray);
+            font-size: 14px;
+            margin: 16px 0;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 200px;
+            margin: 16px 0;
+        }
+
+        .chart-bar-item {
+            flex: 1;
+            background-color: var(--primary-blue);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            min-height: 20px;
+        }
+
+        .chart-bar-label {
+            position: absolute;
+            bottom: -24px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            color: var(--gray-text);
+        }
+
+        .chart-bar-value {
+            position: absolute;
+            top: -24px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--midnight-blue);
+        }
+
+        /* Stat Box */
+        .stat-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 16px 0;
+        }
+
+        .stat-item {
+            background-color: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-gray);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--mid-gray);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        /* Spinner */
+        @keyframes spinner-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinner-animation {
+            animation: spinner-spin 1s linear infinite;
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="header-content">
+            <div class="header-title">
+                <h1>Talent Review</h1>
+                <p>HR Performance & Development Dashboard</p>
+            </div>
+            <div class="associate-info">
+                <strong>HR Team</strong>
+                <p>February 16, 2025</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <!-- Controls -->
+        <section class="controls-section">
+            <h2 class="controls-header">Filter & Sort</h2>
+            <div class="controls-grid">
+                <div class="form-group">
+                    <label class="form-label" for="filter-department">Department</label>
+                    <select class="form-select" id="filter-department">
+                        <option value="">All Departments</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="filter-rating">Performance Rating</label>
+                    <select class="form-select" id="filter-rating">
+                        <option value="">All Ratings</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="search-name">Search by Name</label>
+                    <input class="form-input" type="text" id="search-name" placeholder="First or last name">
+                </div>
+                <div style="display: flex; align-items: flex-end; gap: 8px;">
+                    <button class="btn btn--primary" id="btn-apply-filters">Apply Filters</button>
+                    <button class="btn btn--secondary" id="btn-reset-filters">Reset</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Data Table -->
+            <div class="card">
+                <div class="card__header">
+                    <h2>Team Members</h2>
+                </div>
+                <div class="card__body">
+                    <div class="table-container">
+                        <table class="table" id="data-table">
+                            <thead>
+                                <tr>
+                                    <th class="sortable" data-field="name">Name</th>
+                                    <th class="sortable" data-field="department">Department</th>
+                                    <th class="sortable" data-field="tenure">Tenure</th>
+                                    <th class="sortable" data-field="rating">Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <!-- Data populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card__footer">
+                    <small>Showing <span id="row-count">0</span> team members</small>
+                </div>
+            </div>
+
+            <!-- Charts & Stats -->
+            <div>
+                <!-- Summary Stats -->
+                <div class="card" style="margin-bottom: 32px;">
+                    <div class="card__header">
+                        <h2>Summary</h2>
+                    </div>
+                    <div class="card__body">
+                        <div class="stat-box">
+                            <div class="stat-item">
+                                <div class="stat-label">Total Team</div>
+                                <div class="stat-value" id="stat-total">0</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Avg Tenure</div>
+                                <div class="stat-value" id="stat-tenure">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rating Distribution -->
+                <div class="card">
+                    <div class="card__header">
+                        <h2>Rating Distribution</h2>
+                    </div>
+                    <div class="card__body">
+                        <div class="chart-bar" id="rating-chart">
+                            <!-- Chart bars populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Global data storage
+        let allData = [];
+        let filteredData = [];
+        let sortField = null;
+        let sortDirection = "asc";
+
+        // Load data from JSON file created from CSV
+        async function loadData() {
+            try {
+                console.log('Starting data load...');
+                const response = await fetch('talent_data.json');
+                
+                if (!response.ok) {
+                    console.error('Failed to fetch:', response.status);
+                    return;
+                }
+                
+                allData = await response.json();
+                console.log('Data loaded:', allData.length, 'records');
+                
+                if (allData.length === 0) {
+                    console.error('No data in JSON file');
+                    return;
+                }
+                
+                // Initialize filtered data
+                filteredData = [...allData];
+                
+                // Populate dropdowns
+                populateDropdowns();
+                
+                // Render initial display
+                renderTable();
+                updateStats();
+                
+                console.log('Data initialization complete');
+            } catch (error) {
+                console.error('Error loading data:', error);
+                allData = [];
+                filteredData = [];
+            }
+        }
+
+        function populateDropdowns() {
+            // Get unique departments
+            const departments = [...new Set(allData.map(d => d.department))].sort();
+            const deptSelect = document.getElementById('filter-department');
+            
+            // Clear existing options except first
+            while (deptSelect.options.length > 1) {
+                deptSelect.remove(1);
+            }
+            
+            departments.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept;
+                option.textContent = dept;
+                deptSelect.appendChild(option);
+            });
+            
+            // Get unique ratings
+            const ratings = [...new Set(allData.map(d => d.rating))].sort();
+            const ratingSelect = document.getElementById('filter-rating');
+            
+            // Clear existing options except first
+            while (ratingSelect.options.length > 1) {
+                ratingSelect.remove(1);
+            }
+            
+            ratings.forEach(rating => {
+                const option = document.createElement('option');
+                option.value = rating;
+                option.textContent = rating;
+                ratingSelect.appendChild(option);
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            
+            console.log('Rendering', filteredData.length, 'rows');
+            
+            filteredData.forEach(item => {
+                const row = document.createElement('tr');
+                const ratingClass = `rating-${item.rating.toLowerCase().replace(/\s+/g, '-')}`;
+                
+                row.innerHTML = `
+                    <td>${item.name || 'N/A'}</td>
+                    <td>${item.department || 'N/A'}</td>
+                    <td>${item.tenure || 0} years</td>
+                    <td><span class="rating-badge ${ratingClass}">${(item.rating || 'N/A').substring(0, 1)}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            document.getElementById('row-count').textContent = filteredData.length;
+        }
+
+        function updateStats() {
+            const total = filteredData.length;
+            const avgTenure = total > 0 
+                ? Math.round(filteredData.reduce((sum, d) => sum + (d.tenure || 0), 0) / total)
+                : 0;
+            
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-tenure').textContent = avgTenure + ' yrs';
+            
+            updateRatingChart();
+        }
+
+        function updateRatingChart() {
+            const ratingCounts = {};
+            
+            filteredData.forEach(item => {
+                const rating = item.rating || 'Unknown';
+                ratingCounts[rating] = (ratingCounts[rating] || 0) + 1;
+            });
+            
+            const max = Math.max(...Object.values(ratingCounts), 1);
+            const chartContainer = document.getElementById('rating-chart');
+            chartContainer.innerHTML = '';
+            
+            const colors = {
+                'High Potential': 'var(--accent-magenta)',
+                'Valued Contributor': 'var(--primary-blue)',
+                'Subject Matter Expert': 'var(--success-green)',
+                'Talent Risk': 'var(--error-red)'
+            };
+            
+            Object.entries(ratingCounts).forEach(([label, count]) => {
+                const percentage = (count / max) * 100;
+                const item = document.createElement('div');
+                item.className = 'chart-bar-item';
+                item.style.height = `${percentage}%`;
+                item.style.backgroundColor = colors[label] || 'var(--primary-blue)';
+                item.innerHTML = `
+                    <div class="chart-bar-value">${count}</div>
+                    <div class="chart-bar-label">${label}</div>
+                `;
+                chartContainer.appendChild(item);
+            });
+        }
+
+        function sortTable(field) {
+            if (sortField === field) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortField = field;
+                sortDirection = 'asc';
+            }
+            
+            filteredData.sort((a, b) => {
+                let aVal = a[field] || '';
+                let bVal = b[field] || '';
+                
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+                
+                if (sortDirection === 'asc') {
+                    return aVal > bVal ? 1 : -1;
+                } else {
+                    return aVal < bVal ? 1 : -1;
+                }
+            });
+            
+            updateSortHeaders(field);
+            renderTable();
+        }
+
+        function updateSortHeaders(field) {
+            document.querySelectorAll('.table th').forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+                if (th.dataset.field === field) {
+                    th.classList.add(`sort-${sortDirection}`);
+                }
+            });
+        }
+
+        function applyFilters() {
+            const dept = document.getElementById('filter-department').value;
+            const rating = document.getElementById('filter-rating').value;
+            const name = document.getElementById('search-name').value.toLowerCase();
+            
+            filteredData = allData.filter(item => {
+                const deptMatch = !dept || item.department === dept;
+                const ratingMatch = !rating || item.rating === rating;
+                const nameMatch = !name || (item.name || '').toLowerCase().includes(name);
+                return deptMatch && ratingMatch && nameMatch;
+            });
+            
+            renderTable();
+            updateStats();
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-department').value = '';
+            document.getElementById('filter-rating').value = '';
+            document.getElementById('search-name').value = '';
+            filteredData = [...allData];
+            sortField = null;
+            sortDirection = 'asc';
+            updateSortHeaders();
+            renderTable();
+            updateStats();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...');
+            
+            // Setup sort headers
+            document.querySelectorAll('.table th.sortable').forEach(header => {
+                header.addEventListener('click', function() {
+                    sortTable(this.dataset.field);
+                });
+            });
+            
+            // Setup filter buttons
+            document.getElementById('btn-apply-filters').addEventListener('click', applyFilters);
+            document.getElementById('btn-reset-filters').addEventListener('click', resetFilters);
+            
+            // Load data
+            loadData();
+        });
+    </script>
+</body>
+</html>

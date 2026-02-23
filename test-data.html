@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Load Test</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        table { border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #007bff; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Talent Review Data Test</h1>
+    <div id="status"></div>
+    <table id="preview">
+        <tr><th>Name</th><th>Department</th><th>Tenure</th><th>Rating</th></tr>
+    </table>
+    
+    <script>
+        async function testData() {
+            const status = document.getElementById('status');
+            
+            try {
+                // Attempt to load JSON
+                const response = await fetch('talent_data.json');
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                
+                status.innerHTML = `<div class="status success">✓ Loaded ${data.length} records successfully</div>`;
+                
+                // Show sample
+                const table = document.getElementById('preview');
+                data.slice(0, 10).forEach(r => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${r.name}</td>
+                        <td>${r.department}</td>
+                        <td>${r.tenure}</td>
+                        <td>${r.rating}</td>
+                    `;
+                    table.appendChild(tr);
+                });
+                
+                // Stats
+                const depts = [...new Set(data.map(d => d.department))];
+                const ratings = [...new Set(data.map(d => d.rating))];
+                const avgTenure = Math.round(data.reduce((s, d) => s + d.tenure, 0) / data.length);
+                    
+                const stats = document.createElement('div');
+                stats.className = 'status info';
+                stats.innerHTML = `
+                    <strong>Statistics:</strong><br>
+                    Departments: ${depts.length} (${depts.join(', ')})<br>
+                    Ratings: ${ratings.length} (${ratings.join(', ')})<br>
+                    Average Tenure: ${avgTenure} years
+                `;
+                status.appendChild(stats);
+                
+            } catch (error) {
+                status.innerHTML = `<div class="status error">✗ Error: ${error.message}</div>`;
+            }
+        }
+        
+        testData();
+    </script>
+</body>
+</html>

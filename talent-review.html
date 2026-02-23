@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talent Review | Sam's Club</title>
+    <style>
+        :root {
+            --primary-blue: #0062AD;
+            --sapphire-blue: #00358E;
+            --midnight-blue: #11224B;
+            --ux-blue: #1D4B6D;
+            --tropical-blue: #35C4EC;
+            --sky-blue: #97EAFF;
+            --pool-blue: #42DFE0;
+            --mid-gray: #7C878E;
+            --light-gray: #D0D3D4;
+            --gray-text: #6B7280;
+            --border-gray: #D1D5DB;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --accent-seaglass: #06ACB2;
+            --accent-magenta: #D946EF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Aktiv Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f9fafb;
+            color: var(--gray-text);
+            line-height: 1.6;
+        }
+
+        /* ── Talent Card Modal ── */
+        .tc-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(17,34,75,0.55);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .tc-overlay.open { display: flex; }
+
+        .tc-card {
+            background: #fff;
+            border: 2.5px solid var(--midnight-blue);
+            border-radius: 18px;
+            width: 720px;
+            max-width: 95vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 32px 36px 28px;
+            position: relative;
+            box-shadow: 0 12px 40px rgba(17,34,75,0.18);
+        }
+
+        .tc-close {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            background: none;
+            border: none;
+            font-size: 1.6rem;
+            color: var(--midnight-blue);
+            cursor: pointer;
+            line-height: 1;
+            padding: 2px 6px;
+        }
+        .tc-close:hover { color: var(--error-red); }
+
+        .tc-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 40px;
+        }
+
+        /* Left column */
+        .tc-left {}
+
+        .tc-identity {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .tc-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #D0D3D4;
+            flex-shrink: 0;
+            border: 2px solid var(--light-gray);
+        }
+
+        .tc-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--midnight-blue);
+            margin-bottom: 4px;
+        }
+
+        .tc-role-line {
+            font-size: 0.85rem;
+            color: #333;
+            margin-bottom: 2px;
+        }
+        .tc-role-line strong { color: var(--midnight-blue); }
+
+        .tc-field {
+            font-size: 0.875rem;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .tc-field strong {
+            color: var(--midnight-blue);
+            font-weight: 600;
+        }
+
+        .tc-list {
+            margin: 0 0 0 4px;
+            padding: 0;
+            list-style: none;
+        }
+        .tc-list li {
+            font-size: 0.85rem;
+            color: #444;
+            padding: 1px 0;
+        }
+
+        /* Right column */
+        .tc-right {
+            border-left: 1px solid var(--light-gray);
+            padding-left: 32px;
+        }
+
+        .tc-section-label {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--midnight-blue);
+            margin: 14px 0 4px;
+        }
+        .tc-section-label:first-child { margin-top: 0; }
+
+        .tc-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            background: #E8F0FB;
+            color: var(--midnight-blue);
+        }
+
+        .tc-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 8px 10px;
+            font-size: 0.82rem;
+            font-family: inherit;
+            color: #333;
+            border: 1.5px solid var(--border-gray);
+            border-radius: 8px;
+            resize: vertical;
+            outline: none;
+            background: #f9fafb;
+            line-height: 1.5;
+            transition: border-color 0.15s;
+        }
+        .tc-textarea:focus {
+            border-color: var(--primary-blue);
+            background: #fff;
+        }
+        .tc-textarea-hint {
+            font-size: 0.72rem;
+            color: #9CA3AF;
+            margin-top: 3px;
+        }
+        .tc-mob-sel {
+            padding: 3px 8px;
+            border: 1.5px solid var(--border-gray);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.82rem;
+            color: #374151;
+            background: #f9fafb;
+            cursor: pointer;
+            outline: none;
+            margin-left: 2px;
+        }
+        .tc-mob-sel:focus { border-color: var(--primary-blue); }
+        .tc-save-indicator {
+            font-size: 0.75rem;
+            color: var(--success-green);
+            font-weight: 600;
+            text-align: right;
+            opacity: 0;
+            transition: opacity 0.4s;
+            margin-top: 6px;
+        }
+
+        .tc-rating-history {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .tc-rating-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .tc-rating-year {
+            font-size: 0.78rem;
+            color: var(--gray-text);
+            min-width: 76px;
+            flex-shrink: 0;
+        }
+
+        /* Layout */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--ux-blue) 100%);
+            color: white;
+            padding: 32px;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .header-title {
+            flex: 1;
+        }
+
+        .header-title h1 {
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: 0;
+            margin-bottom: 8px;
+        }
+
+        .header-title p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .associate-info {
+            font-size: 13px;
+            text-align: right;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        /* Controls Section */
+        .controls-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+            border: 1px solid var(--border-gray);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .controls-header {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--midnight-blue);
+            margin-bottom: 16px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        /* Form Inputs */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--midnight-blue);
+            margin-bottom: 8px;
+            text-transform: none;
+        }
+
+        .form-input,
+        .form-select {
+            padding: 10px 12px;
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--gray-text);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px var(--pool-blue), inset 0 0 0 3px var(--pool-blue);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 9999px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn--primary {
+            background-color: var(--primary-blue);
+            color: white;
+        }
+
+        .btn--primary:hover {
+            background-color: var(--sapphire-blue);
+        }
+
+        .btn--primary:focus {
+            outline: 3px solid var(--pool-blue);
+            outline-offset: 2px;
+        }
+
+        .btn--secondary {
+            background-color: var(--light-gray);
+            color: var(--midnight-blue);
+        }
+
+        .btn--secondary:hover {
+            background-color: #bcc0c3;
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card */
+        .card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border-gray);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .card__header {
+            background-color: #f3f4f6;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .card__header h2 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--midnight-blue);
+            margin: 0;
+        }
+
+        .card__body {
+            padding: 24px;
+        }
+
+        .card__footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-gray);
+            background-color: #fafbfc;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .table thead {
+            background-color: #f3f4f6;
+        }
+
+        .table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--midnight-blue);
+            border-bottom: 2px solid var(--border-gray);
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .table th:hover {
+            background-color: #e5e7eb;
+        }
+
+        .table th.sortable::after {
+            content: " ↕";
+            opacity: 0.5;
+            font-size: 12px;
+        }
+
+        .table th.sort-asc::after {
+            content: " ↑";
+            opacity: 1;
+        }
+
+        .table th.sort-desc::after {
+            content: " ↓";
+            opacity: 1;
+        }
+
+        .table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        /* Rating Badge */
+        .rating-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .rating-high-potential {
+            background-color: #7AB648;
+        }
+
+        .rating-valued-contributor {
+            background-color: #0071CE;
+        }
+
+        .rating-subject-matter-expert {
+            background-color: #FFC107;
+            color: #333;
+        }
+
+        .rating-talent-risk {
+            background-color: #FF6D00;
+        }
+
+        .rating-too-new-to-rate {
+            background-color: #7EC8E3;
+            color: #333;
+        }
+
+        .rating-not-rated {
+            background-color: #BDBDBD;
+            color: #333;
+        }
+
+        /* Chart Container */
+        .chart-placeholder {
+            height: 300px;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--mid-gray);
+            font-size: 14px;
+            margin: 16px 0;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 200px;
+            margin: 16px 0;
+        }
+
+        .chart-bar-item {
+            flex: 1;
+            background-color: var(--primary-blue);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            min-height: 20px;
+        }
+
+        .chart-bar-label {
+            position: absolute;
+            bottom: -24px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            color: var(--gray-text);
+        }
+
+        .chart-bar-value {
+            position: absolute;
+            top: -24px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--midnight-blue);
+        }
+
+        /* Stat Box */
+        .stat-box {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin: 0;
+        }
+
+        .stat-item {
+            background-color: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-gray);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--mid-gray);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        /* Spinner */
+        @keyframes spinner-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinner-animation {
+            animation: spinner-spin 1s linear infinite;
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* Multi-select dropdown */
+        .multi-select {
+            position: relative;
+        }
+
+        .multi-select-toggle {
+            padding: 10px 12px;
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--gray-text);
+            background: white;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .multi-select-toggle:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px var(--pool-blue), inset 0 0 0 3px var(--pool-blue);
+        }
+
+        .multi-select-toggle::after {
+            content: "▾";
+            font-size: 12px;
+            color: var(--mid-gray);
+        }
+
+        .multi-select-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 100;
+            margin-top: 4px;
+            padding: 8px 0;
+        }
+
+        .multi-select-dropdown.open {
+            display: block;
+        }
+
+        .multi-select-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--gray-text);
+        }
+
+        .multi-select-option:hover {
+            background-color: #f3f4f6;
+        }
+
+        .multi-select-option input[type="checkbox"] {
+            accent-color: var(--primary-blue);
+        }
+
+        /* Level Breakdown Gauges */
+        .level-breakdown {
+            display: none;
+            margin-bottom: 32px;
+        }
+
+        .level-breakdown.visible {
+            display: block;
+        }
+
+        .gauge-row {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+            padding: 32px 24px;
+        }
+
+        .gauge-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .gauge-circle {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+
+        .gauge-circle svg {
+            transform: rotate(-90deg);
+            width: 100px;
+            height: 100px;
+        }
+
+        .gauge-circle .gauge-bg {
+            fill: none;
+            stroke: #e5e7eb;
+            stroke-width: 8;
+        }
+
+        .gauge-circle .gauge-fill {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.6s ease;
+        }
+
+        .gauge-percent {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--midnight-blue);
+        }
+
+        .gauge-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--midnight-blue);
+            text-align: center;
+        }
+
+        .level-breakdown-subtitle {
+            text-align: center;
+            font-size: 13px;
+            color: var(--mid-gray);
+            margin-top: -8px;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="header-content">
+            <div class="header-title">
+                <h1>Talent Review Dashboard</h1>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <!-- Controls -->
+        <section class="controls-section">
+            <h2 class="controls-header">Filter & Sort</h2>
+            <div class="controls-grid">
+                <div class="form-group">
+                    <label class="form-label" for="filter-department">Department</label>
+                    <select class="form-select" id="filter-department">
+                        <option value="">All Departments</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Membership Insights">Membership Insights</option>
+                        <option value="Experience Strategy">Experience Strategy</option>
+                        <option value="MAP">MAP</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Management Level</label>
+                    <div class="multi-select" id="filter-level-container">
+                        <button type="button" class="multi-select-toggle" id="filter-level-toggle">All Levels</button>
+                        <div class="multi-select-dropdown" id="filter-level-dropdown">
+                            <label class="multi-select-option"><input type="checkbox" value="D"> D - Group Director</label>
+                            <label class="multi-select-option"><input type="checkbox" value="E"> E - Senior Director</label>
+                            <label class="multi-select-option"><input type="checkbox" value="F"> F - Director</label>
+                            <label class="multi-select-option"><input type="checkbox" value="G"> G - Senior Manager</label>
+                            <label class="multi-select-option"><input type="checkbox" value="H"> H - Manager</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="filter-rating">Talent Rating</label>
+                    <select class="form-select" id="filter-rating">
+                        <option value="">All Ratings</option>
+                    </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="search-name">Associate Name</label>
+                    <input class="form-input" type="text" id="search-name" placeholder="First or last name">
+                </div>
+            </div>
+            <div style="margin-top: 16px;">
+                <button class="btn btn--secondary" id="btn-reset-filters">Reset Filters</button>
+            </div>
+        </section>
+
+        <!-- Summary Stats -->
+        <div class="card" style="margin-bottom: 32px;">
+            <div class="card__body">
+                <div class="stat-box">
+                    <div class="stat-item">
+                        <div class="stat-label">Total Associates</div>
+                        <div class="stat-value" id="stat-total">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Avg WM Tenure</div>
+                        <div class="stat-value" id="stat-tenure">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Avg Time in Role</div>
+                        <div class="stat-value" id="stat-role-tenure">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">IDP</div>
+                        <div class="stat-value" id="stat-idp">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rating Distribution -->
+        <div class="card" style="margin-bottom: 32px;">
+            <div class="card__header">
+                <h2>Talent Distribution</h2>
+            </div>
+            <div class="card__body" style="display: flex; justify-content: center; align-items: center; padding: 32px;">
+                <canvas id="donut-chart" width="500" height="400"></canvas>
+            </div>
+            <div id="talent-disclaimer" style="text-align:center; color:#888; font-size:14px; margin-bottom:12px;">
+                Default view is Manager and above.
+            </div>
+        </div>
+
+        <!-- Level Breakdown Gauges -->
+        <div class="card level-breakdown" id="level-breakdown" style="margin-bottom: 32px;">
+            <div class="card__header">
+                <h2 id="level-breakdown-title">Rating Breakdown by Level</h2>
+            </div>
+            <p class="level-breakdown-subtitle" id="level-breakdown-subtitle"></p>
+            <div class="gauge-row" id="gauge-row">
+                <!-- Gauges populated by JS -->
+            </div>
+        </div>
+
+        <!-- Associates Table -->
+        <div class="card">
+            <div class="card__header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Associates</h2>
+                <button class="btn btn--primary" onclick="openTeamView()" style="margin: -4px 0;">Team View</button>
+            </div>
+            <div class="card__body">
+                <div class="table-container">
+                    <table class="table" id="data-table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-field="name">Name</th>
+                                <th class="sortable" data-field="jobProfile">Title</th>
+                                <th class="sortable" data-field="rating">Current Talent Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <!-- Data populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card__footer">
+                <small>Showing <span id="row-count">0</span> associates</small>
+            </div>
+        </div>
+    </main>
+
+    <!-- Talent Card Modal -->
+    <div class="tc-overlay" id="tc-overlay">
+        <div class="tc-card" id="tc-card">
+            <button class="tc-close" id="tc-close" title="Close">&times;</button>
+            <div class="tc-body">
+                <!-- Left -->
+                <div class="tc-left">
+                    <div class="tc-identity">
+                        <img class="tc-avatar" id="tc-avatar" src="" alt="Photo">
+                        <div>
+                            <div class="tc-name" id="tc-name"></div>
+                            <div class="tc-role-line"><strong>Current Role:</strong> <span id="tc-current-role"></span></div>
+                        </div>
+                    </div>
+                    <div class="tc-field"><strong>WMT Tenure:</strong> <span id="tc-tenure"></span></div>
+                    <div class="tc-field"><strong>Role Tenure:</strong> <span id="tc-role-tenure"></span></div>
+
+                    <!-- Talent Rating History -->
+                    <div class="tc-section-label" style="margin-top:14px">Talent Rating History:</div>
+                    <div class="tc-rating-history">
+                        <div class="tc-rating-row">
+                            <span class="tc-rating-year">Current</span>
+                            <span class="tc-badge" id="tc-rating"></span>
+                        </div>
+                        <div class="tc-rating-row">
+                            <span class="tc-rating-year">Last Year</span>
+                            <span class="tc-badge" id="tc-rating-ly"></span>
+                        </div>
+                        <div class="tc-rating-row">
+                            <span class="tc-rating-year">2 Years Ago</span>
+                            <span class="tc-badge" id="tc-rating-2y"></span>
+                        </div>
+                    </div>
+                    <div class="tc-section-label" style="margin-top:10px">Potential Next Role(s):</div>
+                    <textarea class="tc-textarea" id="tc-next-roles" placeholder="Enter potential next roles, one per line…"></textarea>
+                    <div class="tc-textarea-hint">One role per line</div>
+                    <div class="tc-field" style="margin-top:12px"><strong>Mobility:</strong> <span id="tc-mobility"></span><select id="tc-mobility-sel" class="tc-mob-sel" style="display:none"><option value="">Select…</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                </div>
+                <!-- Right -->
+                <div class="tc-right">
+                    <div class="tc-field"><strong>Function:</strong> <span id="tc-function"></span></div>
+                    <div class="tc-field"><strong>Org/Market:</strong> <span id="tc-org"></span></div>
+                    <div class="tc-section-label" style="margin-top:14px">Performance Rating History:</div>
+                    <div class="tc-rating-history">
+                        <div class="tc-rating-row">
+                            <span class="tc-rating-year">Current</span>
+                            <span class="tc-badge" id="tc-perf"></span>
+                        </div>
+                        <div class="tc-rating-row">
+                            <span class="tc-rating-year">Last Year</span>
+                            <span class="tc-badge" id="tc-perf-ly"></span>
+                        </div>
+                        <div class="tc-rating-row">
+                            <span class="tc-rating-year">2 Years Ago</span>
+                            <span class="tc-badge" id="tc-perf-2y"></span>
+                        </div>
+                    </div>
+                    <div class="tc-section-label" style="margin-top:14px">Strengths:</div>
+                    <textarea class="tc-textarea" id="tc-strengths" placeholder="Enter strengths, one per line…"></textarea>
+                    <div class="tc-textarea-hint">One strength per line</div>
+                    <div class="tc-section-label" style="margin-top:10px">Opportunities:</div>
+                    <textarea class="tc-textarea" id="tc-opportunities" placeholder="Enter opportunities, one per line…"></textarea>
+                    <div class="tc-textarea-hint">One opportunity per line</div>
+                    <div id="tc-save-indicator" style="opacity:0;transition:opacity 0.4s;font-size:0.75rem;color:#10B981;font-weight:600;margin-top:6px;text-align:right;">✓ Saved</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global data storage
+        let allData = [];
+        let filteredData = [];
+        let sortField = null;
+        let sortDirection = "asc";
+        let imageMap = {}; // name (lowercase) -> image filename
+
+        function openTeamView() {
+            window.open('team-view.html', '_blank');
+        }
+
+        // Load image map (name -> filename)
+        async function loadImageMap() {
+            try {
+                const res = await fetch('image_map.json');
+                if (res.ok) imageMap = await res.json();
+            } catch(e) { console.warn('image_map.json not loaded', e); }
+        }
+
+        // Load data from JSON file created from CSV
+        async function loadData() {
+            try {
+                console.log('Starting data load...');
+                const response = await fetch('talent_data.json');
+                
+                if (!response.ok) {
+                    console.error('Failed to fetch:', response.status);
+                    return;
+                }
+                
+                allData = await response.json();
+                console.log('Data loaded:', allData.length, 'records');
+                
+                if (allData.length === 0) {
+                    console.error('No data in JSON file');
+                    return;
+                }
+                
+                // Initialize filtered data
+                filteredData = [...allData];
+                
+                // Populate dropdowns
+                populateDropdowns();
+                
+                // Render initial display
+                renderTable();
+                updateStats();
+                
+                console.log('Data initialization complete');
+            } catch (error) {
+                console.error('Error loading data:', error);
+                allData = [];
+                filteredData = [];
+            }
+        }
+
+        function populateDropdowns() {
+            // Get unique departments
+            const departments = [...new Set(allData.map(d => d.department))].sort();
+            const deptSelect = document.getElementById('filter-department');
+            
+            // Clear existing options except first
+            while (deptSelect.options.length > 1) {
+                deptSelect.remove(1);
+            }
+            
+            departments.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept;
+                option.textContent = dept;
+                deptSelect.appendChild(option);
+            });
+            
+            // Get unique ratings (filter out empty)
+            const ratings = [...new Set(allData.map(d => d.rating).filter(r => r && r.trim()))].sort();
+            const ratingSelect = document.getElementById('filter-rating');
+            
+            // Clear existing options except first
+            while (ratingSelect.options.length > 1) {
+                ratingSelect.remove(1);
+            }
+            
+            ratings.forEach(rating => {
+                const option = document.createElement('option');
+                option.value = rating;
+                option.textContent = rating;
+                ratingSelect.appendChild(option);
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            
+            console.log('Rendering', filteredData.length, 'rows');
+            
+            filteredData.forEach(item => {
+                const row = document.createElement('tr');
+                const ratingText = item.rating || 'Not Rated';
+                const ratingClass = `rating-${ratingText.toLowerCase().replace(/\s+/g, '-')}`;
+                row.innerHTML = `
+                    <td>${item.name || 'N/A'}</td>
+                    <td>${item.jobProfile || 'N/A'}</td>
+                    <td><span class="rating-badge ${ratingClass}">${ratingText}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            document.getElementById('row-count').textContent = filteredData.length;
+
+            // Attach card click handler to each row
+            tbody.querySelectorAll('tr').forEach((row, idx) => {
+                row.style.cursor = 'pointer';
+                row.addEventListener('click', function() {
+                    showTalentCard(filteredData[idx]);
+                });
+            });
+        }
+
+        function updateStats() {
+            const total = filteredData.length;
+            const avgTenure = total > 0 
+                ? (filteredData.reduce((sum, d) => sum + (d.tenureNum || 0), 0) / total).toFixed(1)
+                : 0;
+            const avgRoleTenure = total > 0
+                ? (filteredData.reduce((sum, d) => sum + (d.roleTenureNum || 0), 0) / total).toFixed(1)
+                : 0;
+            const idpCount = filteredData.filter(d => d.idpStatus && d.idpStatus !== '').length;
+            
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-tenure').textContent = avgTenure + ' yrs';
+            document.getElementById('stat-role-tenure').textContent = avgRoleTenure + ' yrs';
+            document.getElementById('stat-idp').textContent = idpCount;
+            
+            updateRatingChart();
+        }
+
+        function updateRatingChart() {
+            const ratingOrder = ['High Potential', 'Valued Contributor', 'Subject Matter Expert', 'Talent Risk', 'Too New To Rate', 'Not Rated'];
+            const ratingCounts = {};
+            let total = 0;
+            
+            filteredData.forEach(item => {
+                let rating = item.rating || 'Not Rated';
+                if (rating === 'Unknown') rating = 'Not Rated';
+                ratingCounts[rating] = (ratingCounts[rating] || 0) + 1;
+                total++;
+            });
+            
+            const colors = {
+                'High Potential': '#7AB648',
+                'Valued Contributor': '#0071CE',
+                'Subject Matter Expert': '#FFC107',
+                'Talent Risk': '#FF6D00',
+                'Too New To Rate': '#7EC8E3',
+                'Not Rated': '#BDBDBD'
+            };
+            
+            const canvas = document.getElementById('donut-chart');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = 700 * dpr;
+            canvas.height = 420 * dpr;
+            canvas.style.width = '700px';
+            canvas.style.height = '420px';
+            ctx.scale(dpr, dpr);
+            ctx.clearRect(0, 0, 700, 420);
+            
+            const centerX = 320;
+            const centerY = 210;
+            const outerRadius = 140;
+            const innerRadius = 85;
+            
+            // Build ordered data
+            const data = [];
+            ratingOrder.forEach(label => {
+                if (ratingCounts[label]) {
+                    data.push({ label, count: ratingCounts[label], color: colors[label] || '#999' });
+                }
+            });
+            // Add any others not in order
+            Object.keys(ratingCounts).forEach(label => {
+                if (!ratingOrder.includes(label)) {
+                    data.push({ label, count: ratingCounts[label], color: colors[label] || '#999' });
+                }
+            });
+            
+            // Draw donut slices
+            let startAngle = -Math.PI / 2;
+            const sliceAngles = [];
+            
+            data.forEach(item => {
+                const sliceAngle = (item.count / total) * 2 * Math.PI;
+                
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, outerRadius, startAngle, startAngle + sliceAngle);
+                ctx.arc(centerX, centerY, innerRadius, startAngle + sliceAngle, startAngle, true);
+                ctx.closePath();
+                ctx.fillStyle = item.color;
+                ctx.fill();
+                
+                // White separator line
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                sliceAngles.push({ start: startAngle, end: startAngle + sliceAngle, ...item });
+                startAngle += sliceAngle;
+            });
+            
+            // Center text
+            ctx.fillStyle = '#11224B';
+            ctx.font = 'bold 48px system-ui, -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(total, centerX, centerY - 8);
+            
+            ctx.fillStyle = '#7C878E';
+            ctx.font = '13px system-ui, -apple-system, sans-serif';
+            ctx.fillText('Associate Count', centerX, centerY + 22);
+            
+            // Draw labels with lines
+            sliceAngles.forEach(item => {
+                const midAngle = (item.start + item.end) / 2;
+                const pct = Math.round((item.count / total) * 100);
+                const labelRadius = outerRadius + 30;
+                const lineStart = outerRadius + 5;
+                
+                const x1 = centerX + Math.cos(midAngle) * lineStart;
+                const y1 = centerY + Math.sin(midAngle) * lineStart;
+                const x2 = centerX + Math.cos(midAngle) * labelRadius;
+                const y2 = centerY + Math.sin(midAngle) * labelRadius;
+                
+                // Line from slice to label
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                
+                const isRight = Math.cos(midAngle) >= 0;
+                const x3 = isRight ? x2 + 25 : x2 - 25;
+                ctx.lineTo(x3, y2);
+                ctx.strokeStyle = '#999';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                
+                // Label text - clamp to canvas bounds
+                ctx.textAlign = isRight ? 'left' : 'right';
+                let textX = isRight ? x3 + 5 : x3 - 5;
+                if (textX < 10) textX = 10;
+                if (textX > 690) textX = 690;
+                
+                ctx.fillStyle = '#11224B';
+                ctx.font = 'bold 12px system-ui, -apple-system, sans-serif';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText(item.label, textX, y2 - 1);
+                
+                ctx.fillStyle = '#7C878E';
+                ctx.font = '11px system-ui, -apple-system, sans-serif';
+                ctx.textBaseline = 'top';
+                ctx.fillText(`${pct}% (${item.count})`, textX, y2 + 1);
+            });
+            
+            // Highlight ring for High Potential (if present)
+            const hpSlice = sliceAngles.find(s => s.label === 'High Potential');
+            if (hpSlice) {
+                const midAngle = (hpSlice.start + hpSlice.end) / 2;
+                const highlightRadius = outerRadius + 8;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, highlightRadius, hpSlice.start, hpSlice.end);
+                ctx.strokeStyle = '#7AB648';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+
+        function updateLevelBreakdown() {
+            const selectedRating = document.getElementById('filter-rating').value;
+            const container = document.getElementById('level-breakdown');
+            const gaugeRow = document.getElementById('gauge-row');
+            
+            if (!selectedRating) {
+                container.classList.remove('visible');
+                return;
+            }
+            
+            container.classList.add('visible');
+            document.getElementById('level-breakdown-title').textContent = selectedRating + ' by Management Level';
+            document.getElementById('level-breakdown-subtitle').textContent = '% of associates at each level rated ' + selectedRating;
+            
+            const levels = [
+                {code: 'D', title: 'Group Director'},
+                {code: 'E', title: 'Senior Director'},
+                {code: 'F', title: 'Director'},
+                {code: 'G', title: 'Senior Manager'},
+                {code: 'H', title: 'Manager'},
+            ];
+            const gaugeColor = {
+                'High Potential': '#7AB648',
+                'Valued Contributor': '#0071CE',
+                'Subject Matter Expert': '#FFC107',
+                'Talent Risk': '#FF6D00',
+                'Too New To Rate': '#7EC8E3',
+                'Not Rated': '#BDBDBD'
+            };
+            const color = gaugeColor[selectedRating] || '#0071CE';
+            
+            gaugeRow.innerHTML = '';
+            
+            levels.forEach(lvl => {
+                const totalAtLevel = allData.filter(d => d.managementLevel === lvl.code).length;
+                if (totalAtLevel === 0) return; // skip levels with no associates
+                const ratedAtLevel = allData.filter(d => d.managementLevel === lvl.code && d.rating === selectedRating).length;
+                const pct = totalAtLevel > 0 ? Math.round((ratedAtLevel / totalAtLevel) * 100) : 0;
+                
+                const circumference = 2 * Math.PI * 42;
+                const offset = circumference - (pct / 100) * circumference;
+                
+                const item = document.createElement('div');
+                item.className = 'gauge-item';
+                item.innerHTML = `
+                    <div class="gauge-circle">
+                        <svg viewBox="0 0 100 100">
+                            <circle class="gauge-bg" cx="50" cy="50" r="42"/>
+                            <circle class="gauge-fill" cx="50" cy="50" r="42"
+                                stroke="${color}"
+                                stroke-dasharray="${circumference}"
+                                stroke-dashoffset="${offset}"/>
+                        </svg>
+                        <div class="gauge-percent">${pct}%</div>
+                    </div>
+                    <div class="gauge-label">${lvl.code} - ${lvl.title}</div>
+                `;
+                gaugeRow.appendChild(item);
+            });
+        }
+
+        function sortTable(field) {
+            if (sortField === field) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortField = field;
+                sortDirection = 'asc';
+            }
+            
+            filteredData.sort((a, b) => {
+                let aVal = a[field] || '';
+                let bVal = b[field] || '';
+                
+                if (typeof aVal === 'string') {
+                    aVal = aVal.toLowerCase();
+                    bVal = bVal.toLowerCase();
+                }
+                
+                if (sortDirection === 'asc') {
+                    return aVal > bVal ? 1 : -1;
+                } else {
+                    return aVal < bVal ? 1 : -1;
+                }
+            });
+            
+            updateSortHeaders(field);
+            renderTable();
+        }
+
+        function updateSortHeaders(field) {
+            document.querySelectorAll('.table th').forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+                if (th.dataset.field === field) {
+                    th.classList.add(`sort-${sortDirection}`);
+                }
+            });
+        }
+
+        function applyFilters() {
+            const dept = document.getElementById('filter-department').value;
+            const rating = document.getElementById('filter-rating').value;
+            const name = document.getElementById('search-name').value.toLowerCase();
+            const selectedLevels = Array.from(document.querySelectorAll('#filter-level-dropdown input:checked')).map(cb => cb.value);
+            
+            filteredData = allData.filter(item => {
+                const deptMatch = !dept || item.department === dept;
+                const ratingMatch = !rating || item.rating === rating;
+                const nameMatch = !name || (item.name || '').toLowerCase().includes(name);
+                const levelMatch = selectedLevels.length === 0 || selectedLevels.includes(item.managementLevel);
+                return deptMatch && ratingMatch && nameMatch && levelMatch;
+            });
+            
+            // Show/hide disclaimer based on management level filter
+            const disclaimer = document.getElementById('talent-disclaimer');
+            if (selectedLevels.length === 0) {
+                disclaimer.style.display = '';
+            } else {
+                disclaimer.style.display = 'none';
+            }
+            renderTable();
+            updateStats();
+            updateLevelBreakdown();
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-department').value = '';
+            document.getElementById('filter-rating').value = '';
+            document.getElementById('search-name').value = '';
+            document.querySelectorAll('#filter-level-dropdown input').forEach(cb => cb.checked = false);
+            document.getElementById('filter-level-toggle').textContent = 'All Levels';
+            filteredData = [...allData];
+            sortField = null;
+            sortDirection = 'asc';
+            updateSortHeaders();
+            renderTable();
+            updateStats();
+            updateLevelBreakdown();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...');
+            
+            // Setup sort headers
+            document.querySelectorAll('.table th.sortable').forEach(header => {
+                header.addEventListener('click', function() {
+                    sortTable(this.dataset.field);
+                });
+            });
+            
+            // Setup filter buttons
+            document.getElementById('btn-reset-filters').addEventListener('click', resetFilters);
+            
+            // Auto-apply filters on change
+            document.getElementById('filter-department').addEventListener('change', applyFilters);
+            document.getElementById('filter-rating').addEventListener('change', applyFilters);
+            document.getElementById('search-name').addEventListener('input', applyFilters);
+            document.querySelectorAll('#filter-level-dropdown input').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const selected = Array.from(document.querySelectorAll('#filter-level-dropdown input:checked'));
+                    const labels = selected.map(c => c.parentElement.textContent.trim());
+                    document.getElementById('filter-level-toggle').textContent = labels.length ? labels.join(', ') : 'All Levels';
+                    applyFilters();
+                });
+            });
+
+            // Management Level multi-select toggle
+            document.getElementById('filter-level-toggle').addEventListener('click', function(e) {
+                e.stopPropagation();
+                document.getElementById('filter-level-dropdown').classList.toggle('open');
+            });
+            document.addEventListener('click', function(e) {
+                if (!document.getElementById('filter-level-container').contains(e.target)) {
+                    document.getElementById('filter-level-dropdown').classList.remove('open');
+                }
+            });
+            
+            // Load data & image map
+            loadImageMap();
+            loadData();
+
+            // ── Talent Card logic ──
+            const tcOverlay = document.getElementById('tc-overlay');
+            const tcClose   = document.getElementById('tc-close');
+
+            function hideTalentCard() {
+                tcOverlay.classList.remove('open');
+            }
+
+            tcClose.addEventListener('click', hideTalentCard);
+            tcOverlay.addEventListener('click', function(e) {
+                if (e.target === tcOverlay) hideTalentCard();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') hideTalentCard();
+            });
+
+            window.showTalentCard = function(a) {
+                // Avatar
+                const avatarEl = document.getElementById('tc-avatar');
+                const nameKey = (a.name || '').toLowerCase().trim();
+                const imgFile = imageMap[nameKey];
+                avatarEl.src = imgFile ? `images/${imgFile}` : 'images/default.png';
+                avatarEl.onerror = function() { this.src = 'images/default.png'; };
+
+                // Identity
+                document.getElementById('tc-name').textContent = a.name || '—';
+                document.getElementById('tc-current-role').textContent = a.jobProfile || '—';
+
+                // Tenure
+                const tenYrs = parseFloat(a.tenureYears);
+                const rolYrs = parseFloat(a.roleTenureYears);
+                document.getElementById('tc-tenure').textContent = isNaN(tenYrs) ? (a.tenure || '—') : tenYrs.toFixed(1) + ' Yrs';
+                document.getElementById('tc-role-tenure').textContent = isNaN(rolYrs) ? (a.roleTenure || '—') : rolYrs.toFixed(2) + ' Yrs';
+
+                // Potential next roles — loaded from data or saved edits (handled below with other textareas)
+
+                // Mobility
+                let mobility = '—';
+                if (a.mobilityLongTerm === 'Yes' && a.mobilityShortTerm === 'Yes') mobility = 'Global';
+                else if (a.mobilityLongTerm === 'Yes') mobility = 'Limited';
+                else if (a.mobilityLongTerm === 'No' && a.mobilityShortTerm === 'No') mobility = 'No';
+                else mobility = [a.mobilityLongTerm, a.mobilityShortTerm].filter(Boolean).join(' / ') || '—';
+
+                const mobSpan = document.getElementById('tc-mobility');
+                const mobSelEl = document.getElementById('tc-mobility-sel');
+                if (mobility === '—') {
+                    const _mobKey = `tc_edits_${a.win}`;
+                    const _mobSaved = JSON.parse(localStorage.getItem(_mobKey) || '{}');
+                    mobSpan.style.display = '';
+                    mobSpan.innerHTML = '<em style="color:#9CA3AF;font-style:normal">Not listed &mdash; please select:</em>';
+                    const newMobSel = mobSelEl.cloneNode(true);
+                    newMobSel.value = _mobSaved.mobilityOverride || '';
+                    newMobSel.style.display = '';
+                    mobSelEl.parentNode.replaceChild(newMobSel, mobSelEl);
+                    newMobSel.addEventListener('change', () => {
+                        const _cur = JSON.parse(localStorage.getItem(_mobKey) || '{}');
+                        _cur.mobilityOverride = newMobSel.value;
+                        localStorage.setItem(_mobKey, JSON.stringify(_cur));
+                        const hint = document.getElementById('tc-save-indicator');
+                        if (hint) { hint.style.opacity = '1'; clearTimeout(hint._t); hint._t = setTimeout(() => hint.style.opacity = '0', 1500); }
+                    });
+                } else {
+                    mobSpan.style.display = '';
+                    mobSpan.textContent = mobility;
+                    mobSelEl.style.display = 'none';
+                }
+
+                // Right column
+                document.getElementById('tc-function').textContent = a.jobFamilyGroup || a.jobFamily || '—';
+                document.getElementById('tc-org').textContent = a.department || a.costCenter || '—';
+
+                // Ratings with color badge
+                const ratingColors = {
+                    'High Potential':       '#7AB648',
+                    'Valued Contributor':   '#0071CE',
+                    'Subject Matter Expert':'#FFC107',
+                    'Talent Risk':          '#FF6D00',
+                    'Too New To Rate':      '#7EC8E3',
+                    'Not Rated':            '#BDBDBD'
+                };
+                function applyRatingBadge(elId, value) {
+                    const el = document.getElementById(elId);
+                    el.textContent = value || 'N/A';
+                    el.style.background = ratingColors[value] || '#E8E8E8';
+                    el.style.color = ['High Potential','Valued Contributor','Talent Risk'].includes(value) ? '#fff' : '#11224B';
+                }
+                applyRatingBadge('tc-rating',    a.rating);
+                applyRatingBadge('tc-rating-ly', a.lastYearRating);
+                applyRatingBadge('tc-rating-2y', a.twoYearsAgoRating);
+
+                function applyPerfBadge(elId, value) {
+                    const perfColors = {
+                        'Outstanding':  '#7AB648',
+                        'Successful':   '#0071CE',
+                        'Improvement Needed': '#FF6D00',
+                        'Unsatisfactory': '#EF4444'
+                    };
+                    const el = document.getElementById(elId);
+                    el.textContent = value || 'N/A';
+                    el.style.background = perfColors[value] || '#E8F0FB';
+                    el.style.color = ['Outstanding','Successful'].includes(value) ? '#fff' : '#11224B';
+                }
+                applyPerfBadge('tc-perf',    a.perfRating);
+                applyPerfBadge('tc-perf-ly', a.oneYearAgoPerfRating);
+                applyPerfBadge('tc-perf-2y', a.twoYearAgoPerfRating);
+
+                // Strengths & Opportunities — editable textareas with localStorage persistence
+                const storageKey = `tc_edits_${a.win}`;
+                const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+
+                // Merge: saved edits take priority over base data
+                if (saved.strengths)     a.strengths       = saved.strengths;
+                if (saved.opportunities) a.opportunities   = saved.opportunities;
+                if (saved.futureRoles)   a.futureRoles     = saved.futureRoles;
+
+                const strengthsTA  = document.getElementById('tc-strengths');
+                const oppsTA       = document.getElementById('tc-opportunities');
+                const nextRolesTA  = document.getElementById('tc-next-roles');
+
+                strengthsTA.value  = (a.strengths || []).join('\n');
+                oppsTA.value       = (a.opportunities || a.devFocus || []).join('\n');
+                nextRolesTA.value  = (a.futureRoles || a.potentialNextRoles || []).join('\n');
+
+                // Remove old listeners by replacing elements with clones
+                const newStrengthsTA = strengthsTA.cloneNode(true);
+                const newOppsTA      = oppsTA.cloneNode(true);
+                const newNextRolesTA = nextRolesTA.cloneNode(true);
+                strengthsTA.parentNode.replaceChild(newStrengthsTA, strengthsTA);
+                oppsTA.parentNode.replaceChild(newOppsTA, oppsTA);
+                nextRolesTA.parentNode.replaceChild(newNextRolesTA, nextRolesTA);
+
+                function persistEdits() {
+                    a.strengths     = newStrengthsTA.value.split('\n').map(s => s.trim()).filter(Boolean);
+                    a.opportunities = newOppsTA.value.split('\n').map(s => s.trim()).filter(Boolean);
+                    a.futureRoles   = newNextRolesTA.value.split('\n').map(s => s.trim()).filter(Boolean);
+                    localStorage.setItem(storageKey, JSON.stringify({
+                        strengths:     a.strengths,
+                        opportunities: a.opportunities,
+                        futureRoles:   a.futureRoles
+                    }));
+                    // Flash saved indicator
+                    const hint = document.getElementById('tc-save-indicator');
+                    if (hint) { hint.style.opacity = '1'; clearTimeout(hint._t); hint._t = setTimeout(() => hint.style.opacity = '0', 1500); }
+                }
+
+                newStrengthsTA.addEventListener('input', persistEdits);
+                newOppsTA.addEventListener('input', persistEdits);
+                newNextRolesTA.addEventListener('input', persistEdits);
+
+                tcOverlay.classList.add('open');
+            };
+
+        });
+    </script>
+</body>
+</html>

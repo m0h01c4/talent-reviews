@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team View | Sam's Club Talent Review</title>
+    <style>
+        :root {
+            --primary-blue: #0062AD;
+            --midnight-blue: #11224B;
+            --ux-blue: #1D4B6D;
+            --mid-gray: #7C878E;
+            --light-gray: #D0D3D4;
+            --gray-text: #6B7280;
+            --border-gray: #D1D5DB;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: "Aktiv Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f3f4f6;
+            color: var(--gray-text);
+        }
+
+        /* ── Header ── */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--ux-blue) 100%);
+            color: white;
+            padding: 20px 32px;
+        }
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-content h1 { font-size: 22px; font-weight: 700; }
+        .btn-back {
+            padding: 7px 18px;
+            border: 2px solid white;
+            border-radius: 9999px;
+            background: transparent;
+            color: white;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-back:hover { background: white; color: var(--primary-blue); }
+
+        /* ── Filters bar ── */
+        .filters-bar {
+            background: white;
+            border-bottom: 1px solid var(--border-gray);
+            padding: 14px 32px;
+        }
+        .filters-inner {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            gap: 16px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .filter-group { display: flex; flex-direction: column; gap: 4px; min-width: 200px; flex: 1; }
+        .filter-group label { font-size: 12px; font-weight: 600; color: var(--midnight-blue); }
+        .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 13px;
+            color: #374151;
+            background: #f9fafb;
+        }
+        .filter-group select:focus { outline: none; border-color: var(--primary-blue); }
+        .btn-reset {
+            padding: 8px 18px;
+            border-radius: 8px;
+            border: 1px solid var(--border-gray);
+            background: white;
+            color: var(--midnight-blue);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            align-self: flex-end;
+        }
+        .btn-reset:hover { background: #f3f4f6; }
+
+        /* ── Distribution bar ── */
+        .dist-section {
+            max-width: 1600px;
+            margin: 24px auto 0;
+            padding: 0 32px;
+        }
+        .dist-card {
+            background: white;
+            border: 1px solid var(--border-gray);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+        }
+        .dist-title { font-size: 13px; font-weight: 700; color: var(--midnight-blue); margin-bottom: 14px; }
+        .dist-row { display: flex; align-items: center; margin-bottom: 10px; gap: 12px; }
+        .dist-label { font-size: 12px; font-weight: 600; color: var(--midnight-blue); width: 70px; flex-shrink: 0; }
+        .dist-bar-wrap { flex: 1; height: 32px; border-radius: 6px; overflow: hidden; background: #f3f4f6; display: flex; }
+        .dist-seg {
+            height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; color: white;
+            transition: width 0.4s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            cursor: default;
+        }
+        .dist-legend { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 14px; margin-left: 82px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--gray-text); }
+        .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+        /* ── Rating columns grid ── */
+        .main-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 32px 48px;
+        }
+        .columns-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        /* ── Rating column card ── */
+        .rating-col {
+            background: white;
+            border: 1px solid var(--border-gray);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            min-height: 280px;
+        }
+        .col-header {
+            padding: 14px 16px 12px;
+            border-bottom: 1px solid var(--border-gray);
+            border-top: 4px solid transparent;
+            border-radius: 12px 12px 0 0;
+        }
+        .col-title { font-size: 14px; font-weight: 700; color: var(--midnight-blue); }
+        .col-count { font-size: 12px; color: var(--mid-gray); margin-top: 2px; }
+        .col-body {
+            padding: 10px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        /* ── Associate row ── */
+        .assoc-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: box-shadow 0.15s, border-color 0.15s;
+        }
+        .assoc-row:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.10); border-color: #9CA3AF; }
+        .assoc-photo {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .assoc-initials {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700; color: white;
+            flex-shrink: 0;
+        }
+        .assoc-info { flex: 1; min-width: 0; }
+        .assoc-name { font-size: 13px; font-weight: 600; color: var(--midnight-blue); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .assoc-sub { font-size: 11px; color: var(--mid-gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* ── Empty state ── */
+        .empty-state {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 32px 16px; text-align: center;
+            color: var(--mid-gray);
+        }
+        .empty-icon { font-size: 36px; opacity: 0.2; margin-bottom: 8px; }
+        .empty-text { font-size: 12px; line-height: 1.6; }
+        .empty-text strong { color: var(--midnight-blue); }
+
+        /* ── Not Rated box ── */
+        .not-rated-section { margin-top: 8px; margin-bottom: 32px; }
+        .not-rated-col {
+            background: white;
+            border: 1px solid var(--border-gray);
+            border-top: 4px solid #9CA3AF;
+            border-radius: 12px;
+        }
+        .not-rated-header {
+            padding: 14px 16px 12px;
+            border-bottom: 1px solid var(--border-gray);
+        }
+        .not-rated-body {
+            padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 6px;
+        }
+
+        /* ── Talent Card Modal ── */
+        .tc-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(17,34,75,0.55); z-index: 1000;
+            align-items: center; justify-content: center;
+        }
+        .tc-overlay.open { display: flex; }
+        .tc-card {
+            background: #fff; border: 2.5px solid var(--midnight-blue);
+            border-radius: 18px; width: 720px; max-width: 95vw;
+            max-height: 90vh; overflow-y: auto; padding: 32px 36px 28px;
+            position: relative; box-shadow: 0 12px 40px rgba(17,34,75,0.18);
+        }
+        .tc-close {
+            position: absolute; top: 14px; right: 18px;
+            background: none; border: none; font-size: 1.6rem;
+            color: var(--midnight-blue); cursor: pointer; padding: 2px 6px;
+        }
+        .tc-close:hover { color: var(--error-red); }
+        .tc-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; }
+        .tc-identity { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+        .tc-avatar { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; background: #D0D3D4; flex-shrink: 0; border: 2px solid var(--light-gray); }
+        .tc-name { font-size: 1.25rem; font-weight: 700; color: var(--midnight-blue); margin-bottom: 4px; }
+        .tc-role-line { font-size: 0.85rem; color: #333; margin-bottom: 2px; }
+        .tc-role-line strong { color: var(--midnight-blue); }
+        .tc-field { font-size: 0.875rem; color: #333; margin-bottom: 8px; }
+        .tc-field strong { color: var(--midnight-blue); font-weight: 600; }
+        .tc-section-label { font-size: 0.875rem; font-weight: 700; color: var(--midnight-blue); margin: 14px 0 4px; }
+        .tc-badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; background: #E8F0FB; color: var(--midnight-blue); }
+        .tc-rating-history { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+        .tc-rating-row { display: flex; align-items: center; gap: 10px; }
+        .tc-rating-year { font-size: 0.78rem; color: var(--gray-text); min-width: 76px; flex-shrink: 0; }
+        .tc-right { border-left: 1px solid var(--light-gray); padding-left: 32px; }
+        .tc-textarea { width: 100%; min-height: 72px; padding: 8px 10px; font-size: 0.82rem; font-family: inherit; color: #333; border: 1.5px solid var(--border-gray); border-radius: 8px; resize: vertical; outline: none; background: #f9fafb; line-height: 1.5; transition: border-color 0.15s; }
+        .tc-textarea:focus { border-color: var(--primary-blue); background: #fff; }
+        .tc-textarea-hint { font-size: 0.72rem; color: #9CA3AF; margin-top: 3px; }
+        .tc-mob-sel { padding: 3px 8px; border: 1.5px solid var(--border-gray); border-radius: 6px; font-family: inherit; font-size: 0.82rem; color: #374151; background: #f9fafb; cursor: pointer; outline: none; margin-left: 2px; }
+        .tc-mob-sel:focus { border-color: var(--primary-blue); }
+    </style>
+</head>
+<body>
+
+    <header class="page-header">
+        <div class="header-content">
+            <h1>Team View — Calibration Board</h1>
+            <a href="talent-review.html" class="btn-back">&#8592; Back to Dashboard</a>
+        </div>
+    </header>
+
+    <!-- Filters -->
+    <div class="filters-bar">
+        <div class="filters-inner">
+            <div class="filter-group">
+                <label for="department-select">Department</label>
+                <select id="department-select"><option value="">All Departments</option></select>
+            </div>
+            <div class="filter-group">
+                <label for="manager-select">Manager</label>
+                <select id="manager-select"><option value="">All Managers</option></select>
+            </div>
+            <div class="filter-group">
+                <label for="level-select">Management Level</label>
+                <select id="level-select"><option value="">All Levels</option></select>
+            </div>
+            <button class="btn-reset" id="reset-btn">Reset Filters</button>
+        </div>
+    </div>
+
+    <div class="dist-section">
+        <div class="dist-card" id="dist-card">
+            <div class="dist-title">Rating Distribution</div>
+            <div class="dist-row">
+                <span class="dist-label">Current</span>
+                <div class="dist-bar-wrap" id="dist-bar"></div>
+            </div>
+            <div class="dist-legend" id="dist-legend"></div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="columns-grid" id="columns-grid"></div>
+        <div class="not-rated-section" id="not-rated-section"></div>
+    </div>
+
+    <!-- Talent Card Modal -->
+    <div class="tc-overlay" id="tc-overlay">
+        <div class="tc-card">
+            <button class="tc-close" id="tc-close">&times;</button>
+            <div class="tc-body">
+                <div class="tc-left">
+                    <div class="tc-identity">
+                        <img class="tc-avatar" id="tc-avatar" src="" alt="Photo">
+                        <div>
+                            <div class="tc-name" id="tc-name"></div>
+                            <div class="tc-role-line"><strong>Current Role:</strong> <span id="tc-current-role"></span></div>
+                        </div>
+                    </div>
+                    <div class="tc-field"><strong>WMT Tenure:</strong> <span id="tc-tenure"></span></div>
+                    <div class="tc-field"><strong>Role Tenure:</strong> <span id="tc-role-tenure"></span></div>
+                    <div class="tc-section-label">Talent Rating History:</div>
+                    <div class="tc-rating-history">
+                        <div class="tc-rating-row"><span class="tc-rating-year">Current</span><span class="tc-badge" id="tc-rating"></span></div>
+                        <div class="tc-rating-row"><span class="tc-rating-year">Last Year</span><span class="tc-badge" id="tc-rating-ly"></span></div>
+                        <div class="tc-rating-row"><span class="tc-rating-year">2 Years Ago</span><span class="tc-badge" id="tc-rating-2y"></span></div>
+                    </div>
+                    <div class="tc-section-label" style="margin-top:10px">Potential Next Role(s):</div>
+                    <textarea class="tc-textarea" id="tc-next-roles" placeholder="Enter potential next roles, one per line..."></textarea>
+                    <div class="tc-textarea-hint">One role per line</div>
+                    <div class="tc-field" style="margin-top:12px"><strong>Mobility:</strong> <span id="tc-mobility"></span><select id="tc-mobility-sel" class="tc-mob-sel" style="display:none"><option value="">Select…</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                </div>
+                <div class="tc-right">
+                    <div class="tc-field"><strong>Function:</strong> <span id="tc-function"></span></div>
+                    <div class="tc-field"><strong>Org / Market:</strong> <span id="tc-org"></span></div>
+                    <div class="tc-section-label" style="margin-top:14px">Performance Rating History:</div>
+                    <div class="tc-rating-history">
+                        <div class="tc-rating-row"><span class="tc-rating-year">Current</span><span class="tc-badge" id="tc-perf"></span></div>
+                        <div class="tc-rating-row"><span class="tc-rating-year">Last Year</span><span class="tc-badge" id="tc-perf-ly"></span></div>
+                        <div class="tc-rating-row"><span class="tc-rating-year">2 Years Ago</span><span class="tc-badge" id="tc-perf-2y"></span></div>
+                    </div>
+                    <div class="tc-section-label" style="margin-top:14px">Strengths:</div>
+                    <textarea class="tc-textarea" id="tc-strengths" placeholder="Enter strengths, one per line..."></textarea>
+                    <div class="tc-textarea-hint">One strength per line</div>
+                    <div class="tc-section-label" style="margin-top:10px">Opportunities:</div>
+                    <textarea class="tc-textarea" id="tc-opportunities" placeholder="Enter opportunities, one per line..."></textarea>
+                    <div class="tc-textarea-hint">One opportunity per line</div>
+                    <div id="tc-save-indicator" style="opacity:0;transition:opacity 0.4s;font-size:0.75rem;color:#10B981;font-weight:600;margin-top:6px;text-align:right;">&#10003; Saved</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allData = [];
+        let imageMap = {};
+        let currentAssoc = null;
+
+        const RATINGS = [
+            { key: 'High Potential',       color: '#7AB648' },
+            { key: 'Valued Contributor',    color: '#0071CE' },
+            { key: 'Subject Matter Expert', color: '#FFC107' },
+            { key: 'Talent Risk',           color: '#FF6D00' },
+            { key: 'Too New To Rate',       color: '#7EC8E3' },
+        ];
+
+        const RATING_COLORS = {
+            'High Potential':'#7AB648','Valued Contributor':'#0071CE',
+            'Subject Matter Expert':'#FFC107','Talent Risk':'#FF6D00',
+            'Too New To Rate':'#7EC8E3','Not Rated':'#BDBDBD'
+        };
+        const PERF_COLORS = {
+            'Outstanding':'#7AB648','Successful':'#0071CE',
+            'Improvement Needed':'#FF6D00','Unsatisfactory':'#EF4444'
+        };
+
+        // ── Data loading ──────────────────────────────────────────
+        async function loadImageMap() {
+            try { const r = await fetch('image_map.json'); if (r.ok) imageMap = await r.json(); }
+            catch(e) { console.warn('image_map.json not loaded:', e); }
+        }
+
+        async function loadData() {
+            try {
+                const r = await fetch('talent_data.json');
+                if (!r.ok) return;
+                const raw = await r.json();
+                const seen = new Set();
+                raw.forEach(d => { if (!seen.has(d.win)) { seen.add(d.win); allData.push(d); } });
+                populateFilters();
+                render();
+            } catch(e) { console.error(e); }
+        }
+
+        // ── Helpers ───────────────────────────────────────────────
+        function getLevelLabel(l) {
+            return ({'A':'Officer','B':'Executive VP','C':'Senior VP','D':'VP',
+                     'E':'Senior Director','F':'Group Director','G':'Senior Manager',
+                     'H':'Manager','I':'Team Lead'})[l] || l || '';
+        }
+        function getInitials(name) {
+            if (!name) return '?';
+            const p = name.trim().split(/\s+/);
+            return p.length >= 2 ? (p[0][0]+p[p.length-1][0]).toUpperCase() : name.substring(0,2).toUpperCase();
+        }
+        function getImgSrc(a) {
+            const key = (a.name||'').toLowerCase().trim();
+            return imageMap[key] ? 'images/' + imageMap[key] : null;
+        }
+        function makeInitialsEl(name, color) {
+            const el = document.createElement('div');
+            el.className = 'assoc-initials';
+            el.style.background = color;
+            el.textContent = getInitials(name);
+            return el;
+        }
+
+        // ── Filters ───────────────────────────────────────────────
+        function populateFilters() {
+            const depts  = [...new Set(allData.map(d=>d.department).filter(Boolean))].sort();
+            const levels = [...new Set(allData.map(d=>d.managementLevel).filter(Boolean))].sort();
+            const deptSel  = document.getElementById('department-select');
+            const lvlSel   = document.getElementById('level-select');
+            depts.forEach(v  => { const o=document.createElement('option'); o.value=v; o.textContent=v; deptSel.appendChild(o); });
+            levels.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=getLevelLabel(v)+' ('+v+')'; lvlSel.appendChild(o); });
+
+            function refreshManagers() {
+                const dept = deptSel.value;
+                const mgrSel = document.getElementById('manager-select');
+                const cur = mgrSel.value;
+                while (mgrSel.options.length > 1) mgrSel.remove(1);
+                let pool = allData;
+                if (dept) pool = pool.filter(d=>d.department===dept);
+                [...new Set(pool.map(d=>d.manager).filter(Boolean))].sort()
+                    .forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; mgrSel.appendChild(o); });
+                if ([...mgrSel.options].some(o=>o.value===cur)) mgrSel.value=cur;
+            }
+            refreshManagers();
+            deptSel.addEventListener('change', ()=>{ refreshManagers(); render(); });
+            document.getElementById('manager-select').addEventListener('change', render);
+            lvlSel.addEventListener('change', render);
+            document.getElementById('reset-btn').addEventListener('click', ()=>{
+                deptSel.selectedIndex=0; lvlSel.selectedIndex=0;
+                refreshManagers();
+                document.getElementById('manager-select').selectedIndex=0;
+                render();
+            });
+        }
+
+        function getFiltered() {
+            const dept  = document.getElementById('department-select').value;
+            const mgr   = document.getElementById('manager-select').value;
+            const level = document.getElementById('level-select').value;
+            return allData.filter(d =>
+                (!dept  || d.department===dept) &&
+                (!mgr   || d.manager===mgr) &&
+                (!level || d.managementLevel===level)
+            );
+        }
+
+        // ── Distribution bar ──────────────────────────────────────
+        function renderDist(members) {
+            const bar = document.getElementById('dist-bar');
+            const leg = document.getElementById('dist-legend');
+            bar.innerHTML=''; leg.innerHTML='';
+            if (!members.length) return;
+
+            const counts = {};
+            members.forEach(m => { const r=m.rating||'Not Rated'; counts[r]=(counts[r]||0)+1; });
+            const order = [...RATINGS.map(r=>r.key), 'Not Rated'];
+            Object.keys(counts).forEach(r => { if(!order.includes(r)) order.push(r); });
+
+            order.forEach(rating => {
+                const cnt = counts[rating]||0; if(!cnt) return;
+                const pct = Math.round(cnt/members.length*100);
+                const color = RATING_COLORS[rating]||'#ccc';
+                const textLight = ['#7AB648','#0071CE','#FF6D00','#EF4444'].includes(color);
+
+                const seg = document.createElement('div');
+                seg.className='dist-seg';
+                seg.style.cssText = 'width:'+pct+'%;background:'+color+';';
+                seg.style.color = textLight ? '#fff' : '#11224B';
+                seg.textContent = pct>5 ? cnt+' ('+pct+'%)' : '';
+                seg.title = rating+': '+cnt+' ('+pct+'%)';
+                bar.appendChild(seg);
+
+                const li = document.createElement('div'); li.className='legend-item';
+                li.innerHTML = '<div class="legend-dot" style="background:'+color+'"></div>'+rating;
+                leg.appendChild(li);
+            });
+        }
+
+        // ── Associate card row ────────────────────────────────────
+        function makeAssocRow(a, color) {
+            const row = document.createElement('div');
+            row.className = 'assoc-row';
+
+            const imgSrc = getImgSrc(a);
+            if (imgSrc) {
+                const img = document.createElement('img');
+                img.className = 'assoc-photo';
+                img.src = imgSrc;
+                img.alt = a.name||'';
+                const fallback = makeInitialsEl(a.name, color);
+                fallback.style.display = 'none';
+                img.addEventListener('error', ()=>{ img.style.display='none'; fallback.style.display='flex'; });
+                row.appendChild(img);
+                row.appendChild(fallback);
+            } else {
+                row.appendChild(makeInitialsEl(a.name, color));
+            }
+
+            const info = document.createElement('div');
+            info.className = 'assoc-info';
+            info.innerHTML =
+                '<div class="assoc-name">'+(a.name||'—')+'</div>'+
+                '<div class="assoc-sub">'+getLevelLabel(a.managementLevel)+(a.department?' &middot; '+a.department:'')+'</div>';
+            row.appendChild(info);
+
+            row.addEventListener('click', ()=>openCard(a));
+            return row;
+        }
+
+        // ── Main render ───────────────────────────────────────────
+        function render() {
+            const members = getFiltered();
+            const grid    = document.getElementById('columns-grid');
+            const nrSec   = document.getElementById('not-rated-section');
+            grid.innerHTML = '';
+            nrSec.innerHTML = '';
+
+            renderDist(members);
+
+            const knownRatings = new Set(RATINGS.map(r=>r.key));
+
+            // One column per rating
+            RATINGS.forEach(cfg => {
+                const group = members.filter(d=>d.rating===cfg.key);
+                const col   = document.createElement('div');
+                col.className = 'rating-col';
+
+                const hdr = document.createElement('div');
+                hdr.className = 'col-header';
+                hdr.style.borderTopColor = cfg.color;
+                hdr.innerHTML =
+                    '<div class="col-title">'+cfg.key+'</div>'+
+                    '<div class="col-count">'+group.length+' associate'+(group.length!==1?'s':'')+'</div>';
+                col.appendChild(hdr);
+
+                const body = document.createElement('div');
+                body.className = 'col-body';
+                if (group.length) {
+                    group.sort((a,b)=>(a.name||'').localeCompare(b.name||''))
+                         .forEach(a => body.appendChild(makeAssocRow(a, cfg.color)));
+                } else {
+                    body.innerHTML =
+                        '<div class="empty-state">'+
+                        '<div class="empty-icon">&#128101;</div>'+
+                        '<div class="empty-text">No associates currently in <strong>'+cfg.key+'</strong>.</div>'+
+                        '</div>';
+                }
+                col.appendChild(body);
+                grid.appendChild(col);
+            });
+
+            // Not Rated / other
+            const notRated = members.filter(d=>!d.rating||!knownRatings.has(d.rating));
+            const nrCol = document.createElement('div');
+            nrCol.className = 'not-rated-col';
+
+            const nrHdr = document.createElement('div');
+            nrHdr.className = 'not-rated-header';
+            nrHdr.innerHTML =
+                '<div class="col-title">Not Rated / Other</div>'+
+                '<div class="col-count">'+notRated.length+' associate'+(notRated.length!==1?'s':'')+'</div>';
+            nrCol.appendChild(nrHdr);
+
+            const nrBody = document.createElement('div');
+            nrBody.className = 'not-rated-body';
+            if (notRated.length) {
+                notRated.sort((a,b)=>(a.name||'').localeCompare(b.name||''))
+                        .forEach(a => nrBody.appendChild(makeAssocRow(a, '#9CA3AF')));
+            } else {
+                nrBody.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">&#128101;</div><div class="empty-text">All associates have been rated.</div></div>';
+            }
+            nrCol.appendChild(nrBody);
+            nrSec.appendChild(nrCol);
+        }
+
+        // ── Talent Card ───────────────────────────────────────────
+        const tcOverlay = document.getElementById('tc-overlay');
+        document.getElementById('tc-close').addEventListener('click', ()=>tcOverlay.classList.remove('open'));
+        tcOverlay.addEventListener('click', e=>{ if(e.target===tcOverlay) tcOverlay.classList.remove('open'); });
+        document.addEventListener('keydown', e=>{ if(e.key==='Escape') tcOverlay.classList.remove('open'); });
+
+        function applyBadge(id, val, colorMap) {
+            const el = document.getElementById(id);
+            el.textContent = val||'N/A';
+            const bg = colorMap[val]||'#E8F0FB';
+            el.style.background = bg;
+            el.style.color = ['#7AB648','#0071CE','#FF6D00','#EF4444'].includes(bg)?'#fff':'#11224B';
+        }
+
+        function openCard(a) {
+            currentAssoc = a;
+
+            // Avatar
+            const avatarEl = document.getElementById('tc-avatar');
+            const imgSrc = getImgSrc(a);
+            avatarEl.src = imgSrc || '';
+            avatarEl.style.display = imgSrc ? 'block' : 'none';
+            avatarEl.onerror = ()=>{ avatarEl.style.display='none'; };
+
+            document.getElementById('tc-name').textContent = a.name||'&#8212;';
+            document.getElementById('tc-current-role').textContent = a.jobProfile||'&#8212;';
+
+            const ten = parseFloat(a.tenureYears);
+            const rol = parseFloat(a.roleTenureYears);
+            document.getElementById('tc-tenure').textContent = isNaN(ten) ? (a.tenure||'&#8212;') : ten.toFixed(1)+' yrs';
+            document.getElementById('tc-role-tenure').textContent = isNaN(rol) ? (a.roleTenure||'&#8212;') : rol.toFixed(2)+' yrs';
+
+            applyBadge('tc-rating',    a.rating,               RATING_COLORS);
+            applyBadge('tc-rating-ly', a.lastYearRating,       RATING_COLORS);
+            applyBadge('tc-rating-2y', a.twoYearsAgoRating,    RATING_COLORS);
+            applyBadge('tc-perf',      a.perfRating,           PERF_COLORS);
+            applyBadge('tc-perf-ly',   a.oneYearAgoPerfRating, PERF_COLORS);
+            applyBadge('tc-perf-2y',   a.twoYearAgoPerfRating, PERF_COLORS);
+
+            document.getElementById('tc-function').textContent = a.jobFamilyGroup||a.jobFamily||'&#8212;';
+            document.getElementById('tc-org').textContent = a.department||'&#8212;';
+
+            let mob = '&#8212;';
+            if (a.mobilityLongTerm==='Yes' && a.mobilityShortTerm==='Yes') mob = 'Global';
+            else if (a.mobilityLongTerm==='Yes') mob = 'Long-term';
+            else if (a.mobilityShortTerm==='Yes') mob = 'Short-term';
+            else if (a.mobilityLongTerm==='No' && a.mobilityShortTerm==='No') mob = 'No mobility';
+            else mob = [a.mobilityLongTerm,a.mobilityShortTerm].filter(Boolean).join(' / ')||'&#8212;';
+
+            const mobSpan = document.getElementById('tc-mobility');
+            const mobSelEl = document.getElementById('tc-mobility-sel');
+            if (mob === '&#8212;') {
+                const _mobKey = 'tc_edits_'+(a.win||a.name||'unknown');
+                const _mobSaved = JSON.parse(localStorage.getItem(_mobKey)||'{}');
+                mobSpan.style.display = '';
+                mobSpan.innerHTML = '<em style="color:#9CA3AF;font-style:normal">Not listed &mdash; please select:</em>';
+                const newMobSel = mobSelEl.cloneNode(true);
+                newMobSel.value = _mobSaved.mobilityOverride || '';
+                newMobSel.style.display = '';
+                mobSelEl.parentNode.replaceChild(newMobSel, mobSelEl);
+                newMobSel.addEventListener('change', () => {
+                    const _cur = JSON.parse(localStorage.getItem(_mobKey)||'{}');
+                    _cur.mobilityOverride = newMobSel.value;
+                    localStorage.setItem(_mobKey, JSON.stringify(_cur));
+                    const ind = document.getElementById('tc-save-indicator');
+                    if (ind) { ind.style.opacity='1'; clearTimeout(ind._t); ind._t=setTimeout(()=>ind.style.opacity='0',1500); }
+                });
+            } else {
+                mobSpan.style.display = '';
+                mobSpan.innerHTML = mob;
+                mobSelEl.style.display = 'none';
+            }
+
+            // Editable textareas + localStorage
+            const key = 'tc_edits_'+(a.win||a.name||'unknown');
+            const saved = JSON.parse(localStorage.getItem(key)||'{}');
+            if(saved.strengths)     a.strengths=saved.strengths;
+            if(saved.opportunities) a.opportunities=saved.opportunities;
+            if(saved.futureRoles)   a.futureRoles=saved.futureRoles;
+
+            const sTA  = document.getElementById('tc-strengths');
+            const oTA  = document.getElementById('tc-opportunities');
+            const nrTA = document.getElementById('tc-next-roles');
+            sTA.value  = (a.strengths||[]).join('\n');
+            oTA.value  = (a.opportunities||[]).join('\n');
+            nrTA.value = (a.futureRoles||a.potentialNextRoles||[]).join('\n');
+
+            // Clone to remove old event listeners
+            const newSTA  = sTA.cloneNode(true);
+            const newOTA  = oTA.cloneNode(true);
+            const newNRTA = nrTA.cloneNode(true);
+            sTA.parentNode.replaceChild(newSTA,   sTA);
+            oTA.parentNode.replaceChild(newOTA,   oTA);
+            nrTA.parentNode.replaceChild(newNRTA, nrTA);
+
+            function persist() {
+                a.strengths     = newSTA.value.split('\n').map(s=>s.trim()).filter(Boolean);
+                a.opportunities = newOTA.value.split('\n').map(s=>s.trim()).filter(Boolean);
+                a.futureRoles   = newNRTA.value.split('\n').map(s=>s.trim()).filter(Boolean);
+                localStorage.setItem(key, JSON.stringify({strengths:a.strengths,opportunities:a.opportunities,futureRoles:a.futureRoles}));
+                const ind = document.getElementById('tc-save-indicator');
+                if (ind) { ind.style.opacity='1'; clearTimeout(ind._t); ind._t=setTimeout(()=>ind.style.opacity='0',1500); }
+            }
+            newSTA.addEventListener('input', persist);
+            newOTA.addEventListener('input', persist);
+            newNRTA.addEventListener('input', persist);
+
+            tcOverlay.classList.add('open');
+        }
+
+        // ── Init ─────────────────────────────────────────────────
+        loadImageMap().then(loadData);
+    </script>
+</body>
+</html>
