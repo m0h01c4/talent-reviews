@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Team View | Sam's Club Talent Review</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
     <style>
         :root {
             --primary-blue: #0062AD;
@@ -51,6 +53,20 @@
             transition: all 0.2s;
         }
         .btn-back:hover { background: white; color: var(--primary-blue); }
+        .btn-export {
+            padding: 7px 18px;
+            border: 2px solid rgba(255,255,255,0.7);
+            border-radius: 9999px;
+            background: transparent;
+            color: white;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-export:hover { background: rgba(255,255,255,0.15); }
+        .btn-export:disabled { opacity: 0.6; cursor: wait; }
 
         /* ── Filters bar ── */
         .filters-bar {
@@ -174,6 +190,29 @@
             transition: box-shadow 0.15s, border-color 0.15s;
         }
         .assoc-row:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.10); border-color: #9CA3AF; }
+
+        /* ── Drag & drop ── */
+        .col-body.drag-over,
+        .not-rated-body.drag-over {
+            background: #EBF5FF;
+            outline: 2px dashed var(--primary-blue);
+            border-radius: 8px;
+        }
+        .assoc-row { cursor: grab; }
+        .assoc-row.dragging { opacity: 0.4; cursor: grabbing; }
+        .rating-changed-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #FFC107; flex-shrink: 0; align-self: center;
+        }
+        /* ── Override chip in header ── */
+        .override-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 20px; padding: 4px 12px; font-size: 12px; color: white;
+            font-weight: 600; cursor: pointer; transition: background 0.2s;
+        }
+        .override-chip:hover { background: rgba(255,255,255,0.30); }
+        .override-chip .chip-x { font-size: 14px; opacity: 0.8; margin-left: 2px; }
         .assoc-photo {
             width: 36px; height: 36px;
             border-radius: 50%;
@@ -265,8 +304,17 @@
 
     <header class="page-header">
         <div class="header-content">
-            <h1>Team View — Calibration Board</h1>
-            <a href="talent-review.html" class="btn-back">&#8592; Back to Dashboard</a>
+            <div style="display:flex;align-items:center;gap:14px;">
+                <h1>Team View — Calibration Board</h1>
+                <span id="override-chip" class="override-chip" style="display:none" title="Click to reset all manual rating changes">
+                    <span id="override-count"></span> rating change(s) &middot; <span class="chip-x">&#10005; Reset</span>
+                </span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <button class="btn-export" id="btn-export-edits">&#8595; Export Edits</button>
+                <button class="btn-export" id="btn-export-pptx">&#8595; Export Talent Cards</button>
+                <a href="talent-review.html" class="btn-back">&#8592; Back to Dashboard</a>
+            </div>
         </div>
     </header>
 
@@ -356,6 +404,9 @@
         let allData = [];
         let imageMap = {};
         let currentAssoc = null;
+        let RATING_OVERRIDES = {};  // { win: 'New Rating' }
+        const OVERRIDES_KEY = 'tv_rating_overrides';
+        let _dragWin = null;  // WIN of the card being dragged
 
         const RATINGS = [
             { key: 'High Potential',       color: '#7AB648' },
@@ -388,10 +439,50 @@
                 const raw = await r.json();
                 const seen = new Set();
                 raw.forEach(d => { if (!seen.has(d.win)) { seen.add(d.win); allData.push(d); } });
+                loadRatingOverrides();
                 populateFilters();
                 render();
             } catch(e) { console.error(e); }
         }
+
+        // ── Rating overrides (persisted to localStorage) ──────────────────
+        function loadRatingOverrides() {
+            RATING_OVERRIDES = JSON.parse(localStorage.getItem(OVERRIDES_KEY) || '{}');
+            // Apply overrides to allData
+            allData.forEach(d => {
+                if (RATING_OVERRIDES[d.win] !== undefined) {
+                    d.rating = RATING_OVERRIDES[d.win];
+                }
+            });
+            updateOverrideChip();
+        }
+
+        function saveRatingOverride(win, newRating) {
+            RATING_OVERRIDES[win] = newRating;
+            localStorage.setItem(OVERRIDES_KEY, JSON.stringify(RATING_OVERRIDES));
+            updateOverrideChip();
+        }
+
+        function updateOverrideChip() {
+            const count = Object.keys(RATING_OVERRIDES).length;
+            const chip = document.getElementById('override-chip');
+            const countEl = document.getElementById('override-count');
+            if (count > 0) {
+                chip.style.display = 'inline-flex';
+                countEl.textContent = count;
+            } else {
+                chip.style.display = 'none';
+            }
+        }
+
+        document.getElementById('override-chip').addEventListener('click', () => {
+            if (!confirm('Reset all ' + Object.keys(RATING_OVERRIDES).length + ' manual rating change(s)? This will restore original ratings.')) return;
+            RATING_OVERRIDES = {};
+            localStorage.removeItem(OVERRIDES_KEY);
+            // Re-apply original ratings from a fresh fetch
+            allData = [];
+            loadImageMap().then(loadData);
+        });
 
         // ── Helpers ───────────────────────────────────────────────
         function getLevelLabel(l) {
@@ -495,6 +586,26 @@
         function makeAssocRow(a, color) {
             const row = document.createElement('div');
             row.className = 'assoc-row';
+            row.draggable = true;
+            row.dataset.win = a.win || '';
+
+            row.addEventListener('dragstart', e => {
+                _dragWin = a.win;
+                row.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            row.addEventListener('dragend', () => {
+                row.classList.remove('dragging');
+                _dragWin = null;
+            });
+
+            // Show yellow dot if this rating was manually changed
+            if (RATING_OVERRIDES[a.win] !== undefined) {
+                const dot = document.createElement('div');
+                dot.className = 'rating-changed-dot';
+                dot.title = 'Rating manually changed';
+                row.appendChild(dot);
+            }
 
             const imgSrc = getImgSrc(a);
             if (imgSrc) {
@@ -550,6 +661,22 @@
 
                 const body = document.createElement('div');
                 body.className = 'col-body';
+                body.dataset.rating = cfg.key;
+
+                // Drop zone
+                body.addEventListener('dragover', e => { e.preventDefault(); body.classList.add('drag-over'); });
+                body.addEventListener('dragleave', () => body.classList.remove('drag-over'));
+                body.addEventListener('drop', e => {
+                    e.preventDefault();
+                    body.classList.remove('drag-over');
+                    if (!_dragWin) return;
+                    const assoc = allData.find(d => d.win === _dragWin);
+                    if (!assoc || assoc.rating === cfg.key) return;
+                    assoc.rating = cfg.key;
+                    saveRatingOverride(assoc.win, cfg.key);
+                    render();
+                });
+
                 if (group.length) {
                     group.sort((a,b)=>(a.name||'').localeCompare(b.name||''))
                          .forEach(a => body.appendChild(makeAssocRow(a, cfg.color)));
@@ -578,6 +705,22 @@
 
             const nrBody = document.createElement('div');
             nrBody.className = 'not-rated-body';
+            nrBody.dataset.rating = '';
+
+            // Drop zone (unrating an associate)
+            nrBody.addEventListener('dragover', e => { e.preventDefault(); nrBody.classList.add('drag-over'); });
+            nrBody.addEventListener('dragleave', () => nrBody.classList.remove('drag-over'));
+            nrBody.addEventListener('drop', e => {
+                e.preventDefault();
+                nrBody.classList.remove('drag-over');
+                if (!_dragWin) return;
+                const assoc = allData.find(d => d.win === _dragWin);
+                if (!assoc || (!assoc.rating && !knownRatings.has(assoc.rating))) return;
+                assoc.rating = '';
+                saveRatingOverride(assoc.win, '');
+                render();
+            });
+
             if (notRated.length) {
                 notRated.sort((a,b)=>(a.name||'').localeCompare(b.name||''))
                         .forEach(a => nrBody.appendChild(makeAssocRow(a, '#9CA3AF')));
@@ -698,7 +841,208 @@
             tcOverlay.classList.add('open');
         }
 
+        // ── Export helpers ────────────────────────────────────────
+        async function imgToBase64(url) {
+            try {
+                const res = await fetch(url);
+                if (!res.ok) return null;
+                const blob = await res.blob();
+                return new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror  = () => resolve(null);
+                    reader.readAsDataURL(blob);
+                });
+            } catch { return null; }
+        }
+
+        function exportEditsToExcel() {
+            const members = getFiltered();
+            const rows = [];
+
+            members.forEach(a => {
+                const storageKey = `tc_edits_${a.win}`;
+                const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+                const hasEdits = saved.strengths?.length || saved.opportunities?.length || saved.futureRoles?.length || saved.mobilityOverride;
+                if (!hasEdits) return;
+
+                let mobility = '';
+                if (a.mobilityLongTerm === 'Yes' && a.mobilityShortTerm === 'Yes') mobility = 'Global';
+                else if (a.mobilityLongTerm === 'Yes') mobility = 'Limited';
+                else if (a.mobilityLongTerm === 'No' && a.mobilityShortTerm === 'No') mobility = 'No';
+                else mobility = [a.mobilityLongTerm, a.mobilityShortTerm].filter(Boolean).join(' / ') || '';
+                if (saved.mobilityOverride) mobility = saved.mobilityOverride;
+
+                rows.push({
+                    'Name':                 a.name || '',
+                    'Title':                a.jobProfile || '',
+                    'Department':           a.department || '',
+                    'Level':                `${a.managementLevel} - ${a.managementLevelTitle || ''}`,
+                    'Current Rating':       a.rating || '',
+                    'Strengths':            (saved.strengths || []).join('\n'),
+                    'Opportunities':        (saved.opportunities || []).join('\n'),
+                    'Potential Next Roles': (saved.futureRoles || []).join('\n'),
+                    'Mobility':             mobility
+                });
+            });
+
+            if (rows.length === 0) {
+                alert('No edits found for the current filtered associates.');
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(rows);
+            ws['!cols'] = [
+                { wch: 28 }, { wch: 40 }, { wch: 22 }, { wch: 22 }, { wch: 22 },
+                { wch: 40 }, { wch: 40 }, { wch: 40 }, { wch: 16 }
+            ];
+            XLSX.utils.book_append_sheet(wb, ws, 'Talent Card Edits');
+            const date = new Date().toISOString().slice(0, 10);
+            XLSX.writeFile(wb, `TalentReview_Edits_${date}.xlsx`);
+        }
+
+        async function exportToPowerPoint() {
+            const btn = document.getElementById('btn-export-pptx');
+            btn.textContent = 'Generating…';
+            btn.disabled = true;
+
+            const ratingColors = {
+                'High Potential':        '7AB648',
+                'Valued Contributor':    '0071CE',
+                'Subject Matter Expert': 'FFC107',
+                'Talent Risk':           'FF6D00',
+                'Too New To Rate':       '7EC8E3',
+                'Not Rated':             'BDBDBD'
+            };
+            const perfColors = {
+                'Outstanding':        '7AB648',
+                'Successful':         '0071CE',
+                'Improvement Needed': 'FF6D00',
+                'Unsatisfactory':     'EF4444'
+            };
+            function ratingTextColor(rating, isPerf) {
+                const light = ['Subject Matter Expert','Too New To Rate','Not Rated'];
+                return light.includes(rating) ? '11224B' : 'FFFFFF';
+            }
+
+            const MIDNIGHT = '11224B';
+            const PRIMARY  = '0062AD';
+            const BDGRAY   = 'D1D5DB';
+
+            const prs = new PptxGenJS();
+            prs.layout = 'LAYOUT_WIDE';
+
+            const members = getFiltered();
+
+            for (const a of members) {
+                const saved = JSON.parse(localStorage.getItem(`tc_edits_${a.win}`) || '{}');
+                const strengths     = saved.strengths     || a.strengths     || [];
+                const opportunities = saved.opportunities || a.opportunities || [];
+                const futureRoles   = saved.futureRoles   || a.futureRoles   || a.potentialNextRoles || [];
+
+                let mobility = '';
+                if (a.mobilityLongTerm === 'Yes' && a.mobilityShortTerm === 'Yes') mobility = 'Global';
+                else if (a.mobilityLongTerm === 'Yes') mobility = 'Limited';
+                else if (a.mobilityLongTerm === 'No' && a.mobilityShortTerm === 'No') mobility = 'No';
+                else mobility = [a.mobilityLongTerm, a.mobilityShortTerm].filter(Boolean).join(' / ') || '—';
+                if (saved.mobilityOverride) mobility = saved.mobilityOverride;
+
+                const tenYrs = parseFloat(a.tenureYears);
+                const rolYrs = parseFloat(a.roleTenureYears);
+                const tenureStr    = isNaN(tenYrs) ? (a.tenure || '—') : tenYrs.toFixed(1) + ' yrs';
+                const rolTenureStr = isNaN(rolYrs) ? (a.roleTenure || '—') : rolYrs.toFixed(2) + ' yrs';
+                const levelLabel   = a.managementLevelTitle ? `${a.managementLevel} – ${a.managementLevelTitle}` : (a.managementLevel || '—');
+
+                const slide = prs.addSlide();
+                slide.addShape(prs.ShapeType.rect, { x: 0, y: 0, w: '100%', h: '100%', fill: { color: 'FFFFFF' } });
+                slide.addShape(prs.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 0.75, fill: { color: MIDNIGHT } });
+
+                slide.addText(a.name || '—', {
+                    x: 0.18, y: 0.07, w: 7.5, h: 0.55,
+                    fontSize: 22, bold: true, color: 'FFFFFF', fontFace: 'Calibri', valign: 'middle'
+                });
+                slide.addText(levelLabel, {
+                    x: 9.8, y: 0.07, w: 3.3, h: 0.55,
+                    fontSize: 11, bold: true, color: 'FFFFFF', fontFace: 'Calibri', align: 'right', valign: 'middle'
+                });
+
+                const nameKey = (a.name || '').toLowerCase().trim();
+                const imgFile = imageMap[nameKey];
+                const imgSrc  = imgFile ? `images/${imgFile}` : 'images/default.png';
+                const imgData = await imgToBase64(imgSrc) || await imgToBase64('images/default.png');
+                if (imgData) {
+                    slide.addImage({ data: imgData, x: 0.18, y: 0.85, w: 1.4, h: 1.4, rounding: true });
+                }
+
+                slide.addText(a.jobProfile || '—', {
+                    x: 1.75, y: 0.85, w: 5.5, h: 0.38,
+                    fontSize: 12, color: '333333', fontFace: 'Calibri', valign: 'top'
+                });
+                slide.addText(`Dept: ${a.department || '—'}   |   Function: ${a.jobFamilyGroup || a.jobFamily || '—'}`, {
+                    x: 1.75, y: 1.22, w: 5.5, h: 0.3,
+                    fontSize: 10, color: '555555', fontFace: 'Calibri'
+                });
+                slide.addText(`WMT Tenure: ${tenureStr}   |   Role Tenure: ${rolTenureStr}   |   Mobility: ${mobility}`, {
+                    x: 1.75, y: 1.52, w: 7.5, h: 0.3,
+                    fontSize: 10, color: '555555', fontFace: 'Calibri'
+                });
+                slide.addShape(prs.ShapeType.line, { x: 0.18, y: 2.35, w: 12.97, h: 0, line: { color: BDGRAY, width: 0.75 } });
+
+                function sectionHeader(text, x, y, w) {
+                    slide.addText(text, { x, y, w, h: 0.28, fontSize: 10, bold: true, color: PRIMARY, fontFace: 'Calibri' });
+                }
+
+                sectionHeader('TALENT RATING HISTORY', 0.18, 2.42, 3.0);
+                [{ label: 'Current', val: a.rating }, { label: 'Last Year', val: a.lastYearRating }, { label: '2 Yrs Ago', val: a.twoYearsAgoRating }]
+                    .forEach((tr, i) => {
+                        const yPos = 2.75 + i * 0.42;
+                        slide.addText(tr.label, { x: 0.18, y: yPos, w: 1.0, h: 0.32, fontSize: 9, color: '7C878E', fontFace: 'Calibri', valign: 'middle' });
+                        const bgColor = ratingColors[tr.val] || 'BDBDBD';
+                        slide.addShape(prs.ShapeType.roundRect, { x: 1.22, y: yPos, w: 2.0, h: 0.3, fill: { color: bgColor }, rectRadius: 0.06 });
+                        slide.addText(tr.val || 'N/A', { x: 1.22, y: yPos, w: 2.0, h: 0.3, fontSize: 9, bold: true, color: ratingTextColor(tr.val, false), fontFace: 'Calibri', align: 'center', valign: 'middle' });
+                    });
+
+                sectionHeader('PERFORMANCE RATING HISTORY', 3.55, 2.42, 3.5);
+                [{ label: 'Current', val: a.perfRating }, { label: 'Last Year', val: a.oneYearAgoPerfRating }, { label: '2 Yrs Ago', val: a.twoYearAgoPerfRating }]
+                    .forEach((pr, i) => {
+                        const yPos = 2.75 + i * 0.42;
+                        slide.addText(pr.label, { x: 3.55, y: yPos, w: 1.0, h: 0.32, fontSize: 9, color: '7C878E', fontFace: 'Calibri', valign: 'middle' });
+                        const bgColor = perfColors[pr.val] || 'E8F0FB';
+                        slide.addShape(prs.ShapeType.roundRect, { x: 4.6, y: yPos, w: 2.3, h: 0.3, fill: { color: bgColor }, rectRadius: 0.06 });
+                        slide.addText(pr.val || 'N/A', { x: 4.6, y: yPos, w: 2.3, h: 0.3, fontSize: 9, bold: true, color: ratingTextColor(pr.val, true), fontFace: 'Calibri', align: 'center', valign: 'middle' });
+                    });
+
+                slide.addShape(prs.ShapeType.line, { x: 7.2, y: 2.42, w: 0, h: 5.0, line: { color: BDGRAY, width: 0.75 } });
+
+                sectionHeader('STRENGTHS', 7.38, 2.42, 5.7);
+                slide.addText(strengths.length ? strengths.map(s => `• ${s}`).join('\n') : '—', {
+                    x: 7.38, y: 2.75, w: 5.7, h: 1.45, fontSize: 10, color: '333333', fontFace: 'Calibri', valign: 'top', wrap: true
+                });
+
+                sectionHeader('OPPORTUNITIES / DEVELOPMENT FOCUS', 7.38, 4.28, 5.7);
+                slide.addText(opportunities.length ? opportunities.map(o => `• ${o}`).join('\n') : '—', {
+                    x: 7.38, y: 4.6, w: 5.7, h: 1.3, fontSize: 10, color: '333333', fontFace: 'Calibri', valign: 'top', wrap: true
+                });
+
+                sectionHeader('POTENTIAL NEXT ROLES', 7.38, 6.0, 5.7);
+                slide.addText(futureRoles.length ? futureRoles.map(r => `• ${r}`).join('\n') : '—', {
+                    x: 7.38, y: 6.3, w: 5.7, h: 0.9, fontSize: 10, color: '333333', fontFace: 'Calibri', valign: 'top', wrap: true
+                });
+
+                slide.addShape(prs.ShapeType.rect, { x: 0, y: 7.3, w: '100%', h: 0.2, fill: { color: PRIMARY } });
+            }
+
+            const date = new Date().toISOString().slice(0, 10);
+            await prs.writeFile({ fileName: `TalentReview_Cards_${date}.pptx` });
+
+            btn.textContent = '↓ Export Talent Cards';
+            btn.disabled = false;
+        }
+
         // ── Init ─────────────────────────────────────────────────
+        document.getElementById('btn-export-edits').addEventListener('click', exportEditsToExcel);
+        document.getElementById('btn-export-pptx').addEventListener('click', exportToPowerPoint);
         loadImageMap().then(loadData);
     </script>
 </body>
