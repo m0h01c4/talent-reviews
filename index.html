@@ -965,6 +965,7 @@
         let sortField = null;
         let sortDirection = "asc";
         let imageMap = {}; // name (lowercase) -> image filename
+        const TV_RATING_OVERRIDES_KEY = 'tv_rating_overrides';
 
         function openTeamView() {
             window.open('team-view.html', '_blank');
@@ -973,13 +974,16 @@
         function exportEditsToExcel() {
             // Gather all edits from localStorage that match filteredData
             const rows = [];
+            // Include rating overrides saved from the Team View page
+            const ratingOverrides = JSON.parse(localStorage.getItem(TV_RATING_OVERRIDES_KEY) || '{}');
 
             filteredData.forEach(a => {
                 const storageKey = `tc_edits_${a.win}`;
                 const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+                const ratingOverride = ratingOverrides[a.win];
 
                 // Only include if at least one field was edited
-                const hasEdits = saved.strengths?.length || saved.opportunities?.length || saved.futureRoles?.length || saved.mobilityOverride;
+                const hasEdits = saved.strengths?.length || saved.opportunities?.length || saved.futureRoles?.length || saved.mobilityOverride || ratingOverride;
                 if (!hasEdits) return;
 
                 // Mobility display
@@ -996,7 +1000,7 @@
                     'Title':             a.jobProfile || '',
                     'Department':        a.department || '',
                     'Level':             `${a.managementLevel} - ${a.managementLevelTitle}`,
-                    'Current Rating':    a.rating || '',
+                    'Current Rating':    ratingOverride || a.rating || '',
                     'Strengths':         (saved.strengths || []).join('\n'),
                     'Opportunities':     (saved.opportunities || []).join('\n'),
                     'Potential Next Roles': (saved.futureRoles || []).join('\n'),
@@ -1115,10 +1119,11 @@
             tbody.innerHTML = '';
             
             console.log('Rendering', filteredData.length, 'rows');
+            const tableRatingOverrides = JSON.parse(localStorage.getItem(TV_RATING_OVERRIDES_KEY) || '{}');
             
             filteredData.forEach(item => {
                 const row = document.createElement('tr');
-                const ratingText = item.rating || 'Not Rated';
+                const ratingText = tableRatingOverrides[item.win] || item.rating || 'Not Rated';
                 const ratingClass = `rating-${ratingText.toLowerCase().replace(/\s+/g, '-')}`;
                 row.innerHTML = `
                     <td>${item.name || 'N/A'}</td>
@@ -1487,6 +1492,9 @@
             const LTGRAY   = 'F3F4F6';
             const BDGRAY   = 'D1D5DB';
 
+            // Include rating overrides saved from the Team View page
+            const pptRatingOverrides = JSON.parse(localStorage.getItem(TV_RATING_OVERRIDES_KEY) || '{}');
+
             for (const a of filteredData) {
                 const saved = JSON.parse(localStorage.getItem(`tc_edits_${a.win}`) || '{}');
 
@@ -1494,6 +1502,8 @@
                 const strengths     = saved.strengths     || a.strengths     || [];
                 const opportunities = saved.opportunities || a.opportunities || [];
                 const futureRoles   = saved.futureRoles   || a.futureRoles   || a.potentialNextRoles || [];
+                // Apply rating override from Team View if present
+                const currentRating = pptRatingOverrides[a.win] || a.rating;
 
                 // Mobility
                 let mobility = '';
@@ -1574,7 +1584,7 @@
                 // ── TALENT RATING HISTORY (col 1) ──
                 sectionHeader('TALENT RATING HISTORY', 0.18, 2.42, 3.0);
                 const talentRows = [
-                    { label: 'Current',    val: a.rating },
+                    { label: 'Current',    val: currentRating },
                     { label: 'Last Year',  val: a.lastYearRating },
                     { label: '2 Yrs Ago',  val: a.twoYearsAgoRating },
                 ];
@@ -1774,7 +1784,8 @@
                     el.style.background = ratingColors[value] || '#E8E8E8';
                     el.style.color = ['High Potential','Valued Contributor','Talent Risk'].includes(value) ? '#fff' : '#11224B';
                 }
-                applyRatingBadge('tc-rating',    a.rating);
+                const tvOverrides = JSON.parse(localStorage.getItem(TV_RATING_OVERRIDES_KEY) || '{}');
+                applyRatingBadge('tc-rating',    tvOverrides[a.win] || a.rating);
                 applyRatingBadge('tc-rating-ly', a.lastYearRating);
                 applyRatingBadge('tc-rating-2y', a.twoYearsAgoRating);
 
