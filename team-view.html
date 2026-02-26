@@ -859,11 +859,14 @@
         function exportEditsToExcel() {
             const members = getFiltered();
             const rows = [];
+            // Include rating overrides (stored separately under tv_rating_overrides)
+            const ratingOverrides = JSON.parse(localStorage.getItem(OVERRIDES_KEY) || '{}');
 
             members.forEach(a => {
                 const storageKey = `tc_edits_${a.win}`;
                 const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
-                const hasEdits = saved.strengths?.length || saved.opportunities?.length || saved.futureRoles?.length || saved.mobilityOverride;
+                const ratingOverride = ratingOverrides[a.win];
+                const hasEdits = saved.strengths?.length || saved.opportunities?.length || saved.futureRoles?.length || saved.mobilityOverride || ratingOverride;
                 if (!hasEdits) return;
 
                 let mobility = '';
@@ -878,7 +881,7 @@
                     'Title':                a.jobProfile || '',
                     'Department':           a.department || '',
                     'Level':                `${a.managementLevel} - ${a.managementLevelTitle || ''}`,
-                    'Current Rating':       a.rating || '',
+                    'Current Rating':       ratingOverride || a.rating || '',
                     'Strengths':            (saved.strengths || []).join('\n'),
                     'Opportunities':        (saved.opportunities || []).join('\n'),
                     'Potential Next Roles': (saved.futureRoles || []).join('\n'),
