@@ -1536,9 +1536,9 @@
                 // ── Photo ──
                 const nameKey = (a.name || '').toLowerCase().trim();
                 const imgFile = imageMap[nameKey];
-                const imgSrc  = imgFile ? `images/${imgFile}` : 'images/default.png';
+                const imgSrc  = imgFile ? `${imgFile}` : 'default.png';
                 const imgData = await imgToBase64(imgSrc)
-                    || await imgToBase64('images/default.png');
+                    || await imgToBase64('default.png');
 
                 if (imgData) {
                     const ext = imgData.startsWith('data:image/png') ? 'png' : 'jpeg';
@@ -1709,8 +1709,8 @@
                 const avatarEl = document.getElementById('tc-avatar');
                 const nameKey = (a.name || '').toLowerCase().trim();
                 const imgFile = imageMap[nameKey];
-                avatarEl.src = imgFile ? `images/${imgFile}` : 'images/default.png';
-                avatarEl.onerror = function() { this.src = 'images/default.png'; };
+                avatarEl.src = imgFile ? `${imgFile}` : 'default.png';
+                avatarEl.onerror = function() { this.src = 'default.png'; };
 
                 // Identity
                 document.getElementById('tc-name').textContent = a.name || '—';

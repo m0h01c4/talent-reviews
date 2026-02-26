@@ -497,7 +497,7 @@
         }
         function getImgSrc(a) {
             const key = (a.name||'').toLowerCase().trim();
-            return imageMap[key] ? 'images/' + imageMap[key] : null;
+            return imageMap[key] ? imageMap[key] : null;
         }
         function makeInitialsEl(name, color) {
             const el = document.createElement('div');
@@ -969,8 +969,8 @@
 
                 const nameKey = (a.name || '').toLowerCase().trim();
                 const imgFile = imageMap[nameKey];
-                const imgSrc  = imgFile ? `images/${imgFile}` : 'images/default.png';
-                const imgData = await imgToBase64(imgSrc) || await imgToBase64('images/default.png');
+                const imgSrc  = imgFile ? `${imgFile}` : 'default.png';
+                const imgData = await imgToBase64(imgSrc) || await imgToBase64('default.png');
                 if (imgData) {
                     slide.addImage({ data: imgData, x: 0.18, y: 0.85, w: 1.4, h: 1.4, rounding: true });
                 }
