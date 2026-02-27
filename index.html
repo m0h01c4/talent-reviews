@@ -320,6 +320,52 @@
             flex-shrink: 0;
         }
 
+        /* ── Career Summary ── */
+        .tc-career-summary-section {
+            padding: 12px 24px 4px;
+            border-bottom: 1px solid var(--border-gray);
+            background: #fff;
+        }
+        .tc-career-summary-section .tc-section-label { margin-top: 0; }
+
+        /* ── Education inline input ── */
+        .tc-inline-edit {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--midnight-blue);
+            font-family: inherit;
+            padding: 0;
+        }
+        .tc-inline-edit::placeholder { color: #9CA3AF; font-weight: 400; }
+        .tc-inline-edit:focus { border-bottom: 1.5px solid var(--primary-blue); }
+
+        /* ── Experience checkboxes ── */
+        .tc-exp-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 4px;
+        }
+        .tc-exp-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.8rem;
+            color: #374151;
+            cursor: pointer;
+        }
+        .tc-exp-item input[type="checkbox"] {
+            accent-color: var(--primary-blue);
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
         /* Layout */
         .page-header {
             background: linear-gradient(135deg, var(--primary-blue) 0%, var(--ux-blue) 100%);
@@ -1014,13 +1060,18 @@
                     <div class="tc-stat-value"><span id="tc-mobility"></span><select id="tc-mobility-sel" class="tc-mob-sel" style="display:none"><option value="">Select…</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
                 </div>
                 <div class="tc-stat-item">
-                    <div class="tc-stat-label">Function</div>
-                    <div class="tc-stat-value" id="tc-function"></div>
+                    <div class="tc-stat-label">Education</div>
+                    <div class="tc-stat-value"><input type="text" id="tc-education" class="tc-inline-edit" placeholder="Add education…"></div>
                 </div>
                 <div class="tc-stat-item">
                     <div class="tc-stat-label">Org / Market</div>
                     <div class="tc-stat-value" id="tc-org"></div>
                 </div>
+            </div>
+            <!-- Career Summary -->
+            <div class="tc-career-summary-section">
+                <div class="tc-section-label">Career Summary</div>
+                <textarea class="tc-textarea" id="tc-career-summary" placeholder="Enter career summary…" style="min-height:58px;"></textarea>
             </div>
             <!-- Body -->
             <div class="tc-body">
@@ -1055,6 +1106,16 @@
                             <span class="tc-rating-year">2 Years Ago</span>
                             <span class="tc-badge" id="tc-perf-2y"></span>
                         </div>
+                    </div>
+                    <div class="tc-section-label">Experience</div>
+                    <div class="tc-exp-grid">
+                        <label class="tc-exp-item"><input type="checkbox" id="tc-exp-ecomm"> eComm</label>
+                        <label class="tc-exp-item"><input type="checkbox" id="tc-exp-technology"> Technology</label>
+                        <label class="tc-exp-item"><input type="checkbox" id="tc-exp-global"> Global</label>
+                        <label class="tc-exp-item"><input type="checkbox" id="tc-exp-merchandising"> Merchandising</label>
+                        <label class="tc-exp-item"><input type="checkbox" id="tc-exp-operations"> Operations</label>
+                        <label class="tc-exp-item"><input type="checkbox" id="tc-exp-cluster"> Cluster</label>
+                        <label class="tc-exp-item"><input type="checkbox" id="tc-exp-cross-segment"> Cross-Segment</label>
                     </div>
                 </div>
                 <!-- Right: Editable Sections -->
@@ -1903,8 +1964,7 @@
                 document.getElementById('tc-tenure').textContent = isNaN(tenYrs) ? (a.tenure || '—') : tenYrs.toFixed(1) + ' Yrs';
                 document.getElementById('tc-role-tenure').textContent = isNaN(rolYrs) ? (a.roleTenure || '—') : rolYrs.toFixed(2) + ' Yrs';
 
-                // Stats row: Function, Org
-                document.getElementById('tc-function').textContent = a.jobFamilyGroup || a.jobFamily || '—';
+                // Stats row: Org
                 document.getElementById('tc-org').textContent = a.department || a.costCenter || '—';
 
                 // Mobility
@@ -1989,6 +2049,21 @@
                 if (saved.opportunities) a.opportunities   = saved.opportunities;
                 if (saved.futureRoles)   a.futureRoles     = saved.futureRoles;
 
+                // Career Summary
+                const careerSummaryTA = document.getElementById('tc-career-summary');
+                careerSummaryTA.value = saved.careerSummary || '';
+
+                // Education
+                const educationEl = document.getElementById('tc-education');
+                educationEl.value = saved.education || '';
+
+                // Experience checkboxes
+                const expFields = ['ecomm','technology','global','merchandising','operations','cluster','cross-segment'];
+                expFields.forEach(function(f) {
+                    const cb = document.getElementById('tc-exp-' + f);
+                    if (cb) cb.checked = !!(saved.experience && saved.experience[f]);
+                });
+
                 const strengthsTA  = document.getElementById('tc-strengths');
                 const oppsTA       = document.getElementById('tc-opportunities');
                 const nextRolesTA  = document.getElementById('tc-next-roles');
@@ -1998,30 +2073,52 @@
                 nextRolesTA.value  = (a.futureRoles || a.potentialNextRoles || []).join('\n');
 
                 // Remove old listeners by replacing elements with clones
+                const newCareerSummaryTA = careerSummaryTA.cloneNode(true);
+                const newEducationEl     = educationEl.cloneNode(true);
                 const newStrengthsTA = strengthsTA.cloneNode(true);
                 const newOppsTA      = oppsTA.cloneNode(true);
                 const newNextRolesTA = nextRolesTA.cloneNode(true);
+                careerSummaryTA.parentNode.replaceChild(newCareerSummaryTA, careerSummaryTA);
+                educationEl.parentNode.replaceChild(newEducationEl, educationEl);
                 strengthsTA.parentNode.replaceChild(newStrengthsTA, strengthsTA);
                 oppsTA.parentNode.replaceChild(newOppsTA, oppsTA);
                 nextRolesTA.parentNode.replaceChild(newNextRolesTA, nextRolesTA);
+
+                // Re-bind experience checkbox clones
+                const newExpCbs = {};
+                expFields.forEach(function(f) {
+                    const orig = document.getElementById('tc-exp-' + f);
+                    if (!orig) return;
+                    const clone = orig.cloneNode(true);
+                    orig.parentNode.replaceChild(clone, orig);
+                    newExpCbs[f] = clone;
+                });
 
                 function persistEdits() {
                     a.strengths     = newStrengthsTA.value.split('\n').map(s => s.trim()).filter(Boolean);
                     a.opportunities = newOppsTA.value.split('\n').map(s => s.trim()).filter(Boolean);
                     a.futureRoles   = newNextRolesTA.value.split('\n').map(s => s.trim()).filter(Boolean);
+                    const experience = {};
+                    expFields.forEach(function(f) { if (newExpCbs[f]) experience[f] = newExpCbs[f].checked; });
                     localStorage.setItem(storageKey, JSON.stringify({
                         strengths:     a.strengths,
                         opportunities: a.opportunities,
-                        futureRoles:   a.futureRoles
+                        futureRoles:   a.futureRoles,
+                        careerSummary: newCareerSummaryTA.value,
+                        education:     newEducationEl.value,
+                        experience:    experience
                     }));
                     // Flash saved indicator
                     const hint = document.getElementById('tc-save-indicator');
                     if (hint) { hint.style.opacity = '1'; clearTimeout(hint._t); hint._t = setTimeout(() => hint.style.opacity = '0', 1500); }
                 }
 
+                newCareerSummaryTA.addEventListener('input', persistEdits);
+                newEducationEl.addEventListener('input', persistEdits);
                 newStrengthsTA.addEventListener('input', persistEdits);
                 newOppsTA.addEventListener('input', persistEdits);
                 newNextRolesTA.addEventListener('input', persistEdits);
+                expFields.forEach(function(f) { if (newExpCbs[f]) newExpCbs[f].addEventListener('change', persistEdits); });
 
                 tcOverlay.classList.add('open');
             };
