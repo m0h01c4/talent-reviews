@@ -788,7 +788,6 @@
                             <label class="multi-select-option"><input type="checkbox" value="E"> E - Senior Director</label>
                             <label class="multi-select-option"><input type="checkbox" value="F"> F - Director</label>
                             <label class="multi-select-option"><input type="checkbox" value="G"> G - Senior Manager</label>
-                            <label class="multi-select-option"><input type="checkbox" value="H"> H - Manager</label>
                         </div>
                     </div>
                 </div>
@@ -1054,8 +1053,11 @@
                     return;
                 }
                 
-                allData = await response.json();
-                console.log('Data loaded:', allData.length, 'records');
+                const raw = await response.json();
+                const seen = new Set();
+                allData = [];
+                raw.forEach(d => { if (!seen.has(d.win)) { seen.add(d.win); allData.push(d); } });
+                console.log(`Data loaded: ${allData.length} records (${raw.length - allData.length} duplicates removed)`);
                 
                 if (allData.length === 0) {
                     console.error('No data in JSON file');
@@ -1319,7 +1321,6 @@
                 {code: 'E', title: 'Senior Director'},
                 {code: 'F', title: 'Director'},
                 {code: 'G', title: 'Senior Manager'},
-                {code: 'H', title: 'Manager'},
             ];
             const gaugeColor = {
                 'High Potential': '#7AB648',
