@@ -1932,6 +1932,16 @@
                 const strengths     = saved.strengths     || a.strengths     || [];
                 const opportunities = saved.opportunities || a.opportunities || [];
                 const futureRoles   = saved.futureRoles   || a.futureRoles   || a.potentialNextRoles || [];
+                const careerSummary = saved.careerSummary || '';
+                const education     = saved.education     || '';
+                const readiness     = saved.readiness     || '';
+                const projectedLevel = saved.projectedLevel || '';
+                const devPrograms   = saved.devPrograms   || '';
+                const expLabels = { ecomm: 'eComm', technology: 'Technology', global: 'Global', merchandising: 'Merchandising', operations: 'Operations', cluster: 'Cluster', 'cross-segment': 'Cross-Segment' };
+                const experience = saved.experience || {};
+                const expText = Object.keys(expLabels).filter(f => experience[f]).map(f => expLabels[f]).join(', ') || '—';
+                const expScores = saved.experienceScores || {};
+                const expScoreText = `Func: ${expScores.functional||'—'}  |  Seg: ${expScores.segment||'—'}  |  Digital: ${expScores.digital||'—'}`;
                 // Apply rating override from Team View if present
                 const currentRating = pptRatingOverrides[a.win] || a.rating;
 
@@ -2020,6 +2030,8 @@
                     { label: 'ROLE TENURE',  val: rolTenureStr },
                     { label: 'MOBILITY',     val: mobility },
                     { label: 'FUNCTION',     val: a.jobFamilyGroup || a.jobFamily || '—' },
+                    { label: 'EDUCATION',    val: education || '—' },
+                    { label: 'ORG / MARKET', val: a.department || a.costCenter || '—' },
                 ];
                 const statW = 13.33 / stats.length;
                 stats.forEach((s, i) => {
@@ -2088,38 +2100,55 @@
                     slide.addText(pr.val || 'N/A', { x: 1.22, y: yPos, w: 2.0, h: 0.3, fontSize: 9, bold: true, color: txColor, fontFace: 'Calibri', align: 'center', valign: 'middle' });
                 });
 
+                // ── Additional left panel: READINESS + PROJECTED LEVEL ──
+                const leftExtraStartY = perfSectionY + 1.58; // after last perf row
+                slide.addText('READINESS', { x: 0.18, y: leftExtraStartY, w: 1.3, h: 0.18, fontSize: 7, bold: true, color: '7C878E', fontFace: 'Calibri' });
+                slide.addText(readiness || '—', { x: 0.18, y: leftExtraStartY + 0.20, w: 1.3, h: 0.26, fontSize: 10, bold: true, color: MIDNIGHT, fontFace: 'Calibri' });
+                slide.addText('PROJECTED LEVEL', { x: 1.62, y: leftExtraStartY, w: 1.7, h: 0.18, fontSize: 7, bold: true, color: '7C878E', fontFace: 'Calibri' });
+                slide.addText(projectedLevel || '—', { x: 1.62, y: leftExtraStartY + 0.20, w: 1.7, h: 0.26, fontSize: 10, bold: true, color: MIDNIGHT, fontFace: 'Calibri' });
+
+                // ── Additional left panel: EXPERIENCE ──
+                const expStartY = leftExtraStartY + 0.58;
+                slide.addText('EXPERIENCE', { x: 0.18, y: expStartY, w: leftW, h: 0.18, fontSize: 7, bold: true, color: '7C878E', fontFace: 'Calibri' });
+                slide.addText(expText, { x: 0.18, y: expStartY + 0.20, w: leftW, h: 0.30, fontSize: 8, color: MIDNIGHT, fontFace: 'Calibri', wrap: true });
+
+                // ── Additional left panel: EXPERIENCE SCORES ──
+                const scoreStartY = expStartY + 0.60;
+                slide.addText('EXP SCORES (1=Red · 2=Yellow · 3=Green)', { x: 0.18, y: scoreStartY, w: leftW, h: 0.18, fontSize: 7, bold: true, color: '7C878E', fontFace: 'Calibri' });
+                slide.addText(expScoreText, { x: 0.18, y: scoreStartY + 0.20, w: leftW, h: 0.26, fontSize: 9, bold: true, color: MIDNIGHT, fontFace: 'Calibri' });
+
+                // ── Right panel: CAREER SUMMARY ──
+                const csSectionY = contentY;
+                sectionHeader('CAREER SUMMARY', rightX, csSectionY, rightW);
+                slide.addShape(prs.ShapeType.rect, { x: rightX, y: csSectionY + 0.26, w: rightW, h: 0.62, fill: { color: 'F9FAFB' }, line: { color: BDGRAY, width: 0.5 } });
+                slide.addText(careerSummary || '—', { x: rightX + 0.12, y: csSectionY + 0.30, w: rightW - 0.24, h: 0.54, fontSize: 9, color: '333333', fontFace: 'Calibri', valign: 'top', wrap: true });
+
+                // ── Right panel: DEVELOPMENT PROGRAMS ──
+                const dpSectionY = csSectionY + 1.00;
+                sectionHeader('DEVELOPMENT PROGRAMS', rightX, dpSectionY, rightW);
+                slide.addShape(prs.ShapeType.rect, { x: rightX, y: dpSectionY + 0.26, w: rightW, h: 0.62, fill: { color: 'F9FAFB' }, line: { color: BDGRAY, width: 0.5 } });
+                slide.addText(devPrograms || '—', { x: rightX + 0.12, y: dpSectionY + 0.30, w: rightW - 0.24, h: 0.54, fontSize: 9, color: '333333', fontFace: 'Calibri', valign: 'top', wrap: true });
+
                 // ── Right panel: STRENGTHS ──
-                sectionHeader('STRENGTHS', rightX, contentY, rightW);
-                // Light background panel for strengths
-                slide.addShape(prs.ShapeType.rect, { x: rightX, y: contentY + 0.28, w: rightW, h: 1.55, fill: { color: 'F9FAFB' }, line: { color: BDGRAY, width: 0.5 } });
+                const strSectionY = dpSectionY + 1.00;
+                sectionHeader('STRENGTHS', rightX, strSectionY, rightW);
+                slide.addShape(prs.ShapeType.rect, { x: rightX, y: strSectionY + 0.26, w: rightW, h: 0.98, fill: { color: 'F9FAFB' }, line: { color: BDGRAY, width: 0.5 } });
                 const strengthText = strengths.length ? strengths.map(s => `• ${s}`).join('\n') : '—';
-                slide.addText(strengthText, {
-                    x: rightX + 0.12, y: contentY + 0.33, w: rightW - 0.24, h: 1.45,
-                    fontSize: 10, color: '333333', fontFace: 'Calibri',
-                    valign: 'top', wrap: true
-                });
+                slide.addText(strengthText, { x: rightX + 0.12, y: strSectionY + 0.30, w: rightW - 0.24, h: 0.90, fontSize: 10, color: '333333', fontFace: 'Calibri', valign: 'top', wrap: true });
 
                 // ── Right panel: OPPORTUNITIES ──
-                const oppsSectionY = contentY + 2.0;
+                const oppsSectionY = strSectionY + 1.36;
                 sectionHeader('OPPORTUNITIES / DEVELOPMENT FOCUS', rightX, oppsSectionY, rightW);
-                slide.addShape(prs.ShapeType.rect, { x: rightX, y: oppsSectionY + 0.28, w: rightW, h: 1.45, fill: { color: 'F9FAFB' }, line: { color: BDGRAY, width: 0.5 } });
+                slide.addShape(prs.ShapeType.rect, { x: rightX, y: oppsSectionY + 0.26, w: rightW, h: 0.86, fill: { color: 'F9FAFB' }, line: { color: BDGRAY, width: 0.5 } });
                 const oppsText = opportunities.length ? opportunities.map(o => `• ${o}`).join('\n') : '—';
-                slide.addText(oppsText, {
-                    x: rightX + 0.12, y: oppsSectionY + 0.33, w: rightW - 0.24, h: 1.35,
-                    fontSize: 10, color: '333333', fontFace: 'Calibri',
-                    valign: 'top', wrap: true
-                });
+                slide.addText(oppsText, { x: rightX + 0.12, y: oppsSectionY + 0.30, w: rightW - 0.24, h: 0.78, fontSize: 10, color: '333333', fontFace: 'Calibri', valign: 'top', wrap: true });
 
                 // ── Right panel: POTENTIAL NEXT ROLES ──
-                const rolesSectionY = contentY + 3.62;
+                const rolesSectionY = oppsSectionY + 1.24;
                 sectionHeader('POTENTIAL NEXT ROLES', rightX, rolesSectionY, rightW);
-                slide.addShape(prs.ShapeType.rect, { x: rightX, y: rolesSectionY + 0.28, w: rightW, h: 1.6, fill: { color: 'F9FAFB' }, line: { color: BDGRAY, width: 0.5 } });
+                slide.addShape(prs.ShapeType.rect, { x: rightX, y: rolesSectionY + 0.26, w: rightW, h: 0.72, fill: { color: 'F9FAFB' }, line: { color: BDGRAY, width: 0.5 } });
                 const rolesText = futureRoles.length ? futureRoles.map(r => `• ${r}`).join('\n') : '—';
-                slide.addText(rolesText, {
-                    x: rightX + 0.12, y: rolesSectionY + 0.33, w: rightW - 0.24, h: 1.5,
-                    fontSize: 10, color: '333333', fontFace: 'Calibri',
-                    valign: 'top', wrap: true
-                });
+                slide.addText(rolesText, { x: rightX + 0.12, y: rolesSectionY + 0.30, w: rightW - 0.24, h: 0.64, fontSize: 10, color: '333333', fontFace: 'Calibri', valign: 'top', wrap: true });
 
                 // ── Footer bar ──
                 slide.addShape(prs.ShapeType.rect, { x: 0, y: 7.3, w: '100%', h: 0.2, fill: { color: PRIMARY } });
