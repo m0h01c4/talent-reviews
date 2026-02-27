@@ -287,6 +287,11 @@
             margin-left: 2px;
         }
         .tc-mob-sel:focus { border-color: var(--primary-blue); }
+        .tc-mob-unlisted {
+            font-size: 0.72rem;
+            color: #9CA3AF;
+            font-style: normal;
+        }
         .tc-save-indicator {
             font-size: 0.72rem;
             color: var(--success-green);
@@ -1677,7 +1682,7 @@
                 });
                 slide.addText('TALENT RATING', {
                     x: 10.0, y: 0.1, w: 3.15, h: 0.28,
-                    fontSize: 7, bold: true, color: ratingTxColor === 'FFFFFF' ? 'FFFFFF' : '11224B',
+                    fontSize: 7, bold: true, color: ratingTxColor === 'FFFFFF' ? 'FFFFFF' : MIDNIGHT,
                     fontFace: 'Calibri', align: 'center', valign: 'bottom',
                     transparency: ratingTxColor === 'FFFFFF' ? 30 : 40
                 });
@@ -1915,7 +1920,7 @@
                     const _mobKey = `tc_edits_${a.win}`;
                     const _mobSaved = JSON.parse(localStorage.getItem(_mobKey) || '{}');
                     mobSpan.style.display = '';
-                    mobSpan.innerHTML = '<em style="color:#9CA3AF;font-style:normal;font-size:0.75rem">Not listed &mdash; select:</em>';
+                    mobSpan.innerHTML = '<em class="tc-mob-unlisted">Not listed &mdash; select:</em>';
                     const newMobSel = mobSelEl.cloneNode(true);
                     newMobSel.value = _mobSaved.mobilityOverride || '';
                     newMobSel.style.display = '';
@@ -1957,7 +1962,7 @@
                 // Header rating badge
                 const headerBadge = document.getElementById('tc-header-rating-badge');
                 headerBadge.textContent = currentRating || 'Not Rated';
-                headerBadge.style.background = ratingColors[currentRating] ? ratingColors[currentRating] + 'CC' : 'rgba(255,255,255,0.2)';
+                headerBadge.style.background = ratingColors[currentRating] ? ratingColors[currentRating] + 'CC' /* 80% opacity */ : 'rgba(255,255,255,0.2)';
 
                 function applyPerfBadge(elId, value) {
                     const perfColors = {
