@@ -1120,6 +1120,22 @@
                 </div>
                 <!-- Right: Editable Sections -->
                 <div class="tc-right">
+                    <div class="tc-section-label">Readiness</div>
+                    <select class="form-select" id="tc-readiness" style="width:100%;margin-bottom:4px;">
+                        <option value="">Select…</option>
+                        <option value="RN">RN</option>
+                        <option value="R1">R1</option>
+                        <option value="R2">R2</option>
+                    </select>
+                    <div class="tc-section-label">Projected Achievable Level</div>
+                    <select class="form-select" id="tc-projected-level" style="width:100%;margin-bottom:4px;">
+                        <option value="">Select…</option>
+                        <option value="1 Level">1 Level</option>
+                        <option value="2 Level">2 Level</option>
+                        <option value="2+ Level">2+ Level</option>
+                    </select>
+                    <div class="tc-section-label">Development Programs</div>
+                    <textarea class="tc-textarea" id="tc-dev-programs" placeholder="Development Programs…" style="min-height:48px;"></textarea>
                     <div class="tc-section-label">Strengths</div>
                     <textarea class="tc-textarea" id="tc-strengths" placeholder="Enter strengths, one per line…"></textarea>
                     <div class="tc-textarea-hint">One per line</div>
@@ -1160,7 +1176,7 @@
                 const ratingOverride = ratingOverrides[a.win];
 
                 // Only include if at least one field was edited
-                const hasEdits = saved.strengths?.length || saved.opportunities?.length || saved.futureRoles?.length || saved.mobilityOverride || ratingOverride;
+                const hasEdits = saved.strengths?.length || saved.opportunities?.length || saved.futureRoles?.length || saved.mobilityOverride || ratingOverride || saved.readiness || saved.projectedLevel || saved.devPrograms;
                 if (!hasEdits) return;
 
                 // Mobility display
@@ -1178,6 +1194,9 @@
                     'Department':        a.department || '',
                     'Level':             `${a.managementLevel} - ${a.managementLevelTitle}`,
                     'Current Rating':    ratingOverride || a.rating || '',
+                    'Readiness':         saved.readiness || '',
+                    'Projected Achievable Level': saved.projectedLevel || '',
+                    'Development Programs': saved.devPrograms || '',
                     'Strengths':         (saved.strengths || []).join('\n'),
                     'Opportunities':     (saved.opportunities || []).join('\n'),
                     'Potential Next Roles': (saved.futureRoles || []).join('\n'),
@@ -1200,6 +1219,9 @@
                 { wch: 22 }, // Department
                 { wch: 22 }, // Level
                 { wch: 22 }, // Current Rating
+                { wch: 12 }, // Readiness
+                { wch: 24 }, // Projected Achievable Level
+                { wch: 40 }, // Development Programs
                 { wch: 40 }, // Strengths
                 { wch: 40 }, // Opportunities
                 { wch: 40 }, // Potential Next Roles
@@ -2064,10 +2086,16 @@
                     if (cb) cb.checked = !!(saved.experience && saved.experience[f]);
                 });
 
+                const readinessSel     = document.getElementById('tc-readiness');
+                const projLevelSel     = document.getElementById('tc-projected-level');
+                const devProgramsTA    = document.getElementById('tc-dev-programs');
                 const strengthsTA  = document.getElementById('tc-strengths');
                 const oppsTA       = document.getElementById('tc-opportunities');
                 const nextRolesTA  = document.getElementById('tc-next-roles');
 
+                readinessSel.value     = saved.readiness || '';
+                projLevelSel.value     = saved.projectedLevel || '';
+                devProgramsTA.value    = saved.devPrograms || '';
                 strengthsTA.value  = (a.strengths || []).join('\n');
                 oppsTA.value       = (a.opportunities || a.devFocus || []).join('\n');
                 nextRolesTA.value  = (a.futureRoles || a.potentialNextRoles || []).join('\n');
@@ -2075,11 +2103,17 @@
                 // Remove old listeners by replacing elements with clones
                 const newCareerSummaryTA = careerSummaryTA.cloneNode(true);
                 const newEducationEl     = educationEl.cloneNode(true);
+                const newReadinessSel    = readinessSel.cloneNode(true);
+                const newProjLevelSel    = projLevelSel.cloneNode(true);
+                const newDevProgramsTA   = devProgramsTA.cloneNode(true);
                 const newStrengthsTA = strengthsTA.cloneNode(true);
                 const newOppsTA      = oppsTA.cloneNode(true);
                 const newNextRolesTA = nextRolesTA.cloneNode(true);
                 careerSummaryTA.parentNode.replaceChild(newCareerSummaryTA, careerSummaryTA);
                 educationEl.parentNode.replaceChild(newEducationEl, educationEl);
+                readinessSel.parentNode.replaceChild(newReadinessSel, readinessSel);
+                projLevelSel.parentNode.replaceChild(newProjLevelSel, projLevelSel);
+                devProgramsTA.parentNode.replaceChild(newDevProgramsTA, devProgramsTA);
                 strengthsTA.parentNode.replaceChild(newStrengthsTA, strengthsTA);
                 oppsTA.parentNode.replaceChild(newOppsTA, oppsTA);
                 nextRolesTA.parentNode.replaceChild(newNextRolesTA, nextRolesTA);
@@ -2101,12 +2135,15 @@
                     const experience = {};
                     expFields.forEach(function(f) { if (newExpCbs[f]) experience[f] = newExpCbs[f].checked; });
                     localStorage.setItem(storageKey, JSON.stringify({
-                        strengths:     a.strengths,
-                        opportunities: a.opportunities,
-                        futureRoles:   a.futureRoles,
-                        careerSummary: newCareerSummaryTA.value,
-                        education:     newEducationEl.value,
-                        experience:    experience
+                        strengths:      a.strengths,
+                        opportunities:  a.opportunities,
+                        futureRoles:    a.futureRoles,
+                        careerSummary:  newCareerSummaryTA.value,
+                        education:      newEducationEl.value,
+                        experience:     experience,
+                        readiness:      newReadinessSel.value,
+                        projectedLevel: newProjLevelSel.value,
+                        devPrograms:    newDevProgramsTA.value
                     }));
                     // Flash saved indicator
                     const hint = document.getElementById('tc-save-indicator');
@@ -2115,6 +2152,9 @@
 
                 newCareerSummaryTA.addEventListener('input', persistEdits);
                 newEducationEl.addEventListener('input', persistEdits);
+                newReadinessSel.addEventListener('change', persistEdits);
+                newProjLevelSel.addEventListener('change', persistEdits);
+                newDevProgramsTA.addEventListener('input', persistEdits);
                 newStrengthsTA.addEventListener('input', persistEdits);
                 newOppsTA.addEventListener('input', persistEdits);
                 newNextRolesTA.addEventListener('input', persistEdits);

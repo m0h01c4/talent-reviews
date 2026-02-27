@@ -442,6 +442,22 @@
                         <div class="tc-rating-row"><span class="tc-rating-year">Last Year</span><span class="tc-badge" id="tc-perf-ly"></span></div>
                         <div class="tc-rating-row"><span class="tc-rating-year">2 Years Ago</span><span class="tc-badge" id="tc-perf-2y"></span></div>
                     </div>
+                    <div class="tc-section-label" style="margin-top:14px">Readiness:</div>
+                    <select class="tc-mob-sel" id="tc-readiness" style="width:100%;margin-bottom:4px;">
+                        <option value="">Select…</option>
+                        <option value="RN">RN</option>
+                        <option value="R1">R1</option>
+                        <option value="R2">R2</option>
+                    </select>
+                    <div class="tc-section-label" style="margin-top:10px">Projected Achievable Level:</div>
+                    <select class="tc-mob-sel" id="tc-projected-level" style="width:100%;margin-bottom:4px;">
+                        <option value="">Select…</option>
+                        <option value="1 Level">1 Level</option>
+                        <option value="2 Level">2 Level</option>
+                        <option value="2+ Level">2+ Level</option>
+                    </select>
+                    <div class="tc-section-label" style="margin-top:10px">Development Programs:</div>
+                    <textarea class="tc-textarea" id="tc-dev-programs" placeholder="Development Programs…" style="min-height:48px;"></textarea>
                     <div class="tc-section-label" style="margin-top:14px">Strengths:</div>
                     <textarea class="tc-textarea" id="tc-strengths" placeholder="Enter strengths, one per line..."></textarea>
                     <div class="tc-textarea-hint">One strength per line</div>
@@ -887,17 +903,29 @@
             if(saved.opportunities) a.opportunities=saved.opportunities;
             if(saved.futureRoles)   a.futureRoles=saved.futureRoles;
 
+            const readinessSel  = document.getElementById('tc-readiness');
+            const projLevelSel  = document.getElementById('tc-projected-level');
+            const devProgramsTA = document.getElementById('tc-dev-programs');
             const sTA  = document.getElementById('tc-strengths');
             const oTA  = document.getElementById('tc-opportunities');
             const nrTA = document.getElementById('tc-next-roles');
+            readinessSel.value  = saved.readiness || '';
+            projLevelSel.value  = saved.projectedLevel || '';
+            devProgramsTA.value = saved.devPrograms || '';
             sTA.value  = (a.strengths||[]).join('\n');
             oTA.value  = (a.opportunities||[]).join('\n');
             nrTA.value = (a.futureRoles||a.potentialNextRoles||[]).join('\n');
 
             // Clone to remove old event listeners
+            const newReadinessSel  = readinessSel.cloneNode(true);
+            const newProjLevelSel  = projLevelSel.cloneNode(true);
+            const newDevProgramsTA = devProgramsTA.cloneNode(true);
             const newSTA  = sTA.cloneNode(true);
             const newOTA  = oTA.cloneNode(true);
             const newNRTA = nrTA.cloneNode(true);
+            readinessSel.parentNode.replaceChild(newReadinessSel,   readinessSel);
+            projLevelSel.parentNode.replaceChild(newProjLevelSel,   projLevelSel);
+            devProgramsTA.parentNode.replaceChild(newDevProgramsTA, devProgramsTA);
             sTA.parentNode.replaceChild(newSTA,   sTA);
             oTA.parentNode.replaceChild(newOTA,   oTA);
             nrTA.parentNode.replaceChild(newNRTA, nrTA);
@@ -906,10 +934,20 @@
                 a.strengths     = newSTA.value.split('\n').map(s=>s.trim()).filter(Boolean);
                 a.opportunities = newOTA.value.split('\n').map(s=>s.trim()).filter(Boolean);
                 a.futureRoles   = newNRTA.value.split('\n').map(s=>s.trim()).filter(Boolean);
-                localStorage.setItem(key, JSON.stringify({strengths:a.strengths,opportunities:a.opportunities,futureRoles:a.futureRoles}));
+                localStorage.setItem(key, JSON.stringify({
+                    strengths:      a.strengths,
+                    opportunities:  a.opportunities,
+                    futureRoles:    a.futureRoles,
+                    readiness:      newReadinessSel.value,
+                    projectedLevel: newProjLevelSel.value,
+                    devPrograms:    newDevProgramsTA.value
+                }));
                 const ind = document.getElementById('tc-save-indicator');
                 if (ind) { ind.style.opacity='1'; clearTimeout(ind._t); ind._t=setTimeout(()=>ind.style.opacity='0',1500); }
             }
+            newReadinessSel.addEventListener('change', persist);
+            newProjLevelSel.addEventListener('change', persist);
+            newDevProgramsTA.addEventListener('input', persist);
             newSTA.addEventListener('input', persist);
             newOTA.addEventListener('input', persist);
             newNRTA.addEventListener('input', persist);
@@ -942,7 +980,7 @@
                 const storageKey = `tc_edits_${a.win}`;
                 const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
                 const ratingOverride = ratingOverrides[a.win];
-                const hasEdits = saved.strengths?.length || saved.opportunities?.length || saved.futureRoles?.length || saved.mobilityOverride || ratingOverride;
+                const hasEdits = saved.strengths?.length || saved.opportunities?.length || saved.futureRoles?.length || saved.mobilityOverride || ratingOverride || saved.readiness || saved.projectedLevel || saved.devPrograms;
                 if (!hasEdits) return;
 
                 let mobility = '';
@@ -958,6 +996,9 @@
                     'Department':           a.department || '',
                     'Level':                `${a.managementLevel} - ${a.managementLevelTitle || ''}`,
                     'Current Rating':       ratingOverride || a.rating || '',
+                    'Readiness':            saved.readiness || '',
+                    'Projected Achievable Level': saved.projectedLevel || '',
+                    'Development Programs': saved.devPrograms || '',
                     'Strengths':            (saved.strengths || []).join('\n'),
                     'Opportunities':        (saved.opportunities || []).join('\n'),
                     'Potential Next Roles': (saved.futureRoles || []).join('\n'),
@@ -974,6 +1015,7 @@
             const ws = XLSX.utils.json_to_sheet(rows);
             ws['!cols'] = [
                 { wch: 28 }, { wch: 40 }, { wch: 22 }, { wch: 22 }, { wch: 22 },
+                { wch: 12 }, { wch: 24 }, { wch: 40 },
                 { wch: 40 }, { wch: 40 }, { wch: 40 }, { wch: 16 }
             ];
             XLSX.utils.book_append_sheet(wb, ws, 'Talent Card Edits');
