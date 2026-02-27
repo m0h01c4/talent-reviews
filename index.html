@@ -343,6 +343,172 @@
         .tc-inline-edit::placeholder { color: #9CA3AF; font-weight: 400; }
         .tc-inline-edit:focus { border-bottom: 1.5px solid var(--primary-blue); }
 
+        /* ── Experience Scoring Table ── */
+        .tc-scoring-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            font-size: 0.8rem;
+        }
+        .tc-scoring-table th {
+            text-align: left;
+            padding: 5px 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--midnight-blue);
+            border-bottom: 2px solid var(--border-gray);
+            background: #f3f4f6;
+        }
+        .tc-scoring-table td {
+            padding: 5px 6px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+            vertical-align: middle;
+        }
+        .tc-scoring-table select {
+            padding: 3px 6px;
+            border: 1px solid var(--border-gray);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.78rem;
+            color: #374151;
+            background: #f9fafb;
+            cursor: pointer;
+            width: 100%;
+        }
+        .tc-scoring-table select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+        /* Tooltip for category labels */
+        .tc-cat-wrap {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            cursor: default;
+        }
+        .tc-cat-wrap .tc-info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            color: white;
+            font-size: 9px;
+            font-weight: 700;
+            flex-shrink: 0;
+            cursor: help;
+        }
+        .tc-cat-wrap .tc-tooltip {
+            display: none;
+            position: absolute;
+            left: 0;
+            top: calc(100% + 4px);
+            z-index: 100;
+            background: var(--midnight-blue);
+            color: white;
+            font-size: 0.72rem;
+            font-weight: 400;
+            line-height: 1.45;
+            padding: 8px 10px;
+            border-radius: 6px;
+            width: 220px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+            pointer-events: none;
+        }
+        .tc-cat-wrap:hover .tc-tooltip { display: block; }
+        /* Rating guide button */
+        .tc-rating-guide-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            font-family: inherit;
+            font-size: 0.72rem;
+            color: var(--primary-blue);
+            text-decoration: underline;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .tc-rating-guide-btn:hover { color: var(--sapphire-blue); }
+        /* Rating guide overlay */
+        .tc-rating-guide-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(17,34,75,0.60);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .tc-rating-guide-overlay.open { display: flex; }
+        .tc-rating-guide-modal {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            max-width: 660px;
+            width: 94vw;
+            box-shadow: 0 20px 60px rgba(17,34,75,0.28);
+            position: relative;
+        }
+        .tc-rating-guide-modal h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--midnight-blue);
+            margin-bottom: 14px;
+        }
+        .tc-rating-guide-modal .tc-close-guide {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            font-size: 1.3rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--mid-gray);
+            line-height: 1;
+        }
+        .tc-rating-guide-modal img {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid var(--border-gray);
+        }
+        .tc-rating-guide-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+        .tc-rating-guide-table th {
+            background: var(--midnight-blue);
+            color: white;
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .tc-rating-guide-table td {
+            padding: 7px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+        }
+        .tc-rating-guide-table tr:nth-child(even) td { background: #f9fafb; }
+        .tc-rating-level-badge {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 0.78rem;
+            color: white;
+        }
+        .tc-badge-1 { background: #EF4444; }
+        .tc-badge-2 { background: #F97316; }
+        .tc-badge-3 { background: #EAB308; }
+        .tc-badge-4 { background: #10B981; }
+        .tc-badge-5 { background: #0062AD; }
+
         /* ── Experience checkboxes ── */
         .tc-exp-grid {
             display: flex;
@@ -1117,6 +1283,77 @@
                         <label class="tc-exp-item"><input type="checkbox" id="tc-exp-cluster"> Cluster</label>
                         <label class="tc-exp-item"><input type="checkbox" id="tc-exp-cross-segment"> Cross-Segment</label>
                     </div>
+                    <!-- Experience Scoring Table -->
+                    <table class="tc-scoring-table" id="tc-scoring-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>
+                                    Rating&nbsp;
+                                    <button class="tc-rating-guide-btn" id="tc-rating-guide-open" title="View rating definitions">📋 Guide</button>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span class="tc-cat-wrap">
+                                        Functional Experience
+                                        <span class="tc-info-icon">i</span>
+                                        <span class="tc-tooltip">Depth of expertise and demonstrated proficiency in core functional disciplines relevant to the role (e.g., Marketing, Finance, Operations, Technology).</span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <select id="tc-score-functional">
+                                        <option value="">Select…</option>
+                                        <option value="1">1 – Developing</option>
+                                        <option value="2">2 – Building</option>
+                                        <option value="3">3 – Proficient</option>
+                                        <option value="4">4 – Advanced</option>
+                                        <option value="5">5 – Expert</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="tc-cat-wrap">
+                                        Segment Experience
+                                        <span class="tc-info-icon">i</span>
+                                        <span class="tc-tooltip">Breadth of knowledge and effectiveness across different business segments, channels, or markets (e.g., eComm, Club, Fuel, Sam's Club Health).</span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <select id="tc-score-segment">
+                                        <option value="">Select…</option>
+                                        <option value="1">1 – Developing</option>
+                                        <option value="2">2 – Building</option>
+                                        <option value="3">3 – Proficient</option>
+                                        <option value="4">4 – Advanced</option>
+                                        <option value="5">5 – Expert</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="tc-cat-wrap">
+                                        Digital &amp; Technical Acumen
+                                        <span class="tc-info-icon">i</span>
+                                        <span class="tc-tooltip">Ability to leverage digital tools, data analytics, and technology to drive business outcomes, innovation, and competitive advantage.</span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <select id="tc-score-digital">
+                                        <option value="">Select…</option>
+                                        <option value="1">1 – Developing</option>
+                                        <option value="2">2 – Building</option>
+                                        <option value="3">3 – Proficient</option>
+                                        <option value="4">4 – Advanced</option>
+                                        <option value="5">5 – Expert</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
                 <!-- Right: Editable Sections -->
                 <div class="tc-right">
@@ -1960,7 +2197,27 @@
                 if (e.target === tcOverlay) hideTalentCard();
             });
             document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') hideTalentCard();
+                if (e.key === 'Escape') {
+                    const guideOverlay = document.getElementById('tc-rating-guide-overlay');
+                    if (guideOverlay && guideOverlay.classList.contains('open')) {
+                        guideOverlay.classList.remove('open');
+                        return;
+                    }
+                    hideTalentCard();
+                }
+            });
+
+            // Rating guide modal
+            const ratingGuideOverlay = document.getElementById('tc-rating-guide-overlay');
+            document.getElementById('tc-rating-guide-open').addEventListener('click', function(e) {
+                e.stopPropagation();
+                ratingGuideOverlay.classList.add('open');
+            });
+            document.getElementById('tc-close-guide').addEventListener('click', function() {
+                ratingGuideOverlay.classList.remove('open');
+            });
+            ratingGuideOverlay.addEventListener('click', function(e) {
+                if (e.target === ratingGuideOverlay) ratingGuideOverlay.classList.remove('open');
             });
 
             window.showTalentCard = function(a) {
@@ -2086,6 +2343,13 @@
                     if (cb) cb.checked = !!(saved.experience && saved.experience[f]);
                 });
 
+                // Experience scoring selects
+                const scoreFields = ['functional', 'segment', 'digital'];
+                scoreFields.forEach(function(f) {
+                    const sel = document.getElementById('tc-score-' + f);
+                    if (sel) sel.value = (saved.experienceScores && saved.experienceScores[f]) || '';
+                });
+
                 const readinessSel     = document.getElementById('tc-readiness');
                 const projLevelSel     = document.getElementById('tc-projected-level');
                 const devProgramsTA    = document.getElementById('tc-dev-programs');
@@ -2128,12 +2392,24 @@
                     newExpCbs[f] = clone;
                 });
 
+                // Re-bind experience score select clones
+                const newScoreSels = {};
+                scoreFields.forEach(function(f) {
+                    const orig = document.getElementById('tc-score-' + f);
+                    if (!orig) return;
+                    const clone = orig.cloneNode(true);
+                    orig.parentNode.replaceChild(clone, orig);
+                    newScoreSels[f] = clone;
+                });
+
                 function persistEdits() {
                     a.strengths     = newStrengthsTA.value.split('\n').map(s => s.trim()).filter(Boolean);
                     a.opportunities = newOppsTA.value.split('\n').map(s => s.trim()).filter(Boolean);
                     a.futureRoles   = newNextRolesTA.value.split('\n').map(s => s.trim()).filter(Boolean);
                     const experience = {};
                     expFields.forEach(function(f) { if (newExpCbs[f]) experience[f] = newExpCbs[f].checked; });
+                    const experienceScores = {};
+                    scoreFields.forEach(function(f) { if (newScoreSels[f]) experienceScores[f] = newScoreSels[f].value; });
                     localStorage.setItem(storageKey, JSON.stringify({
                         strengths:      a.strengths,
                         opportunities:  a.opportunities,
@@ -2141,6 +2417,7 @@
                         careerSummary:  newCareerSummaryTA.value,
                         education:      newEducationEl.value,
                         experience:     experience,
+                        experienceScores: experienceScores,
                         readiness:      newReadinessSel.value,
                         projectedLevel: newProjLevelSel.value,
                         devPrograms:    newDevProgramsTA.value
@@ -2159,11 +2436,56 @@
                 newOppsTA.addEventListener('input', persistEdits);
                 newNextRolesTA.addEventListener('input', persistEdits);
                 expFields.forEach(function(f) { if (newExpCbs[f]) newExpCbs[f].addEventListener('change', persistEdits); });
+                scoreFields.forEach(function(f) { if (newScoreSels[f]) newScoreSels[f].addEventListener('change', persistEdits); });
 
                 tcOverlay.classList.add('open');
             };
 
         });
     </script>
+
+    <!-- Rating Guide Modal -->
+    <div class="tc-rating-guide-overlay" id="tc-rating-guide-overlay">
+        <div class="tc-rating-guide-modal">
+            <button class="tc-close-guide" id="tc-close-guide" aria-label="Close rating guide">&times;</button>
+            <h3>Experience Rating Guide</h3>
+            <table class="tc-rating-guide-table">
+                <thead>
+                    <tr>
+                        <th style="width:90px">Rating</th>
+                        <th>Level</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="tc-rating-level-badge tc-badge-1">1</span></td>
+                        <td><strong>Developing</strong></td>
+                        <td>Limited exposure; actively building foundational knowledge and skills in this area.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tc-rating-level-badge tc-badge-2">2</span></td>
+                        <td><strong>Building</strong></td>
+                        <td>Growing experience with some demonstrated application; still developing consistency and depth.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tc-rating-level-badge tc-badge-3">3</span></td>
+                        <td><strong>Proficient</strong></td>
+                        <td>Solid competence; consistently applies knowledge and skills to deliver results independently.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tc-rating-level-badge tc-badge-4">4</span></td>
+                        <td><strong>Advanced</strong></td>
+                        <td>Strong depth and breadth; recognized as a go-to resource who elevates team capabilities.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tc-rating-level-badge tc-badge-5">5</span></td>
+                        <td><strong>Expert</strong></td>
+                        <td>Exceptional mastery; drives strategy, innovation, and industry-leading outcomes in this domain.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </body>
 </html>
