@@ -1133,8 +1133,11 @@
                     <input class="form-input" type="text" id="search-name" placeholder="First or last name">
                 </div>
             </div>
-            <div style="margin-top: 16px;">
+            <div style="margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                 <button class="btn btn--secondary" id="btn-reset-filters">Reset Filters</button>
+                <button class="btn btn--secondary" id="btn-export-edits">&#8595; Export Edits</button>
+                <button class="btn btn--secondary" id="btn-export-pptx">&#8595; Export Talent Cards</button>
+                <button class="btn btn--primary" onclick="openTeamView()">Team View</button>
             </div>
         </section>
 
@@ -1188,13 +1191,8 @@
 
         <!-- Associates Table -->
         <div class="card">
-            <div class="card__header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div class="card__header">
                 <h2>Associates</h2>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                    <button class="btn btn--secondary" id="btn-export-edits" style="margin: -4px 0;">&#8595; Export Edits</button>
-                    <button class="btn btn--secondary" id="btn-export-pptx" style="margin: -4px 0;">&#8595; Export Talent Cards</button>
-                    <button class="btn btn--primary" onclick="openTeamView()" style="margin: -4px 0;">Team View</button>
-                </div>
             </div>
             <div class="card__body">
                 <div class="table-container">
