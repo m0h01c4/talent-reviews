@@ -1537,9 +1537,11 @@
         function openTeamView() {
             const dept   = document.getElementById('filter-department').value;
             const levels = Array.from(document.querySelectorAll('#filter-level-dropdown input:checked')).map(cb => cb.value);
+            const rating = document.getElementById('filter-rating').value;
             const params = new URLSearchParams();
             if (dept)           params.set('dept', dept);
             if (levels.length)  params.set('levels', levels.join(','));
+            if (rating)         params.set('rating', rating);
             const url = 'team-view.html' + (params.toString() ? '?' + params.toString() : '');
             window.location.href = url;
         }
@@ -1714,6 +1716,26 @@
                 option.textContent = rating;
                 ratingSelect.appendChild(option);
             });
+
+            // Apply filter values passed back from team-view via URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlDept   = urlParams.get('dept');
+            const urlLevels = urlParams.get('levels');
+            const urlRating = urlParams.get('rating');
+            if (urlDept && Array.from(deptSelect.options).some(o => o.value === urlDept)) {
+                deptSelect.value = urlDept;
+            }
+            if (urlLevels) {
+                const lvlArr = urlLevels.split(',');
+                document.querySelectorAll('#filter-level-dropdown input').forEach(cb => { cb.checked = lvlArr.includes(cb.value); });
+                const selected = Array.from(document.querySelectorAll('#filter-level-dropdown input:checked'));
+                const labels = selected.map(cb => cb.parentElement.textContent.trim());
+                document.getElementById('filter-level-toggle').textContent = labels.length ? labels.join(', ') : 'All Levels';
+            }
+            if (urlRating && Array.from(ratingSelect.options).some(o => o.value === urlRating)) {
+                ratingSelect.value = urlRating;
+            }
+            if (urlDept || urlLevels || urlRating) applyFilters();
         }
 
         function renderTable() {

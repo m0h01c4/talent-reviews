@@ -956,7 +956,7 @@
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                 <button class="btn-export" id="btn-export-edits">&#8595; Export Edits</button>
                 <button class="btn-export" id="btn-export-pptx">&#8595; Export Talent Cards</button>
-                <a href="index.html" class="btn-back">&#8592; Back to Dashboard</a>
+                <a href="index.html" class="btn-back" id="btn-back-dashboard">&#8592; Back to Dashboard</a>
             </div>
         </div>
     </header>
@@ -984,6 +984,10 @@
                         <label class="multi-select-option"><input type="checkbox" value="H"> H - Manager</label>
                     </div>
                 </div>
+            </div>
+            <div class="filter-group">
+                <label for="rating-select">Talent Rating</label>
+                <select id="rating-select"><option value="">All Ratings</option></select>
             </div>
             <button class="btn-reset" id="reset-btn">Reset Filters</button>
         </div>
@@ -1343,6 +1347,12 @@
             const deptSel  = document.getElementById('department-select');
             depts.forEach(v  => { const o=document.createElement('option'); o.value=v; o.textContent=v; deptSel.appendChild(o); });
 
+            // Populate rating filter
+            const ratings = [...new Set(allData.map(d=>d.rating).filter(Boolean))].sort();
+            const ratingSel = document.getElementById('rating-select');
+            ratings.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; ratingSel.appendChild(o); });
+            ratingSel.addEventListener('change', render);
+
             // Multi-select level filter
             const lvlToggle   = document.getElementById('level-select-toggle');
             const lvlDropdown = document.getElementById('level-select-dropdown');
@@ -1386,16 +1396,38 @@
                 lvlToggle.textContent = 'All Levels';
                 refreshManagers();
                 document.getElementById('manager-select').selectedIndex=0;
+                ratingSel.selectedIndex=0;
                 render();
+            });
+
+            // Wire up "Back to Dashboard" to preserve current filters in the URL
+            document.getElementById('btn-back-dashboard').addEventListener('click', function(e) {
+                e.preventDefault();
+                const dept    = deptSel.value;
+                const mgr     = document.getElementById('manager-select').value;
+                const levels  = [...lvlCheckboxes].filter(c=>c.checked).map(c=>c.value);
+                const rating  = ratingSel.value;
+                const params  = new URLSearchParams();
+                if (dept)          params.set('dept', dept);
+                if (mgr)           params.set('mgr', mgr);
+                if (levels.length) params.set('levels', levels.join(','));
+                if (rating)        params.set('rating', rating);
+                window.location.href = 'index.html' + (params.toString() ? '?' + params.toString() : '');
             });
 
             // Apply filter values passed from the talent dashboard via URL parameters
             const urlParams = new URLSearchParams(window.location.search);
             const urlDept   = urlParams.get('dept');
             const urlLevels = urlParams.get('levels');
+            const urlRating = urlParams.get('rating');
+            const urlMgr    = urlParams.get('mgr');
             if (urlDept && Array.from(deptSel.options).some(o => o.value === urlDept)) {
                 deptSel.value = urlDept;
                 refreshManagers();
+            }
+            if (urlMgr) {
+                const mgrSel = document.getElementById('manager-select');
+                if (Array.from(mgrSel.options).some(o => o.value === urlMgr)) mgrSel.value = urlMgr;
             }
             if (urlLevels) {
                 const lvlArr = urlLevels.split(',');
@@ -1404,16 +1436,21 @@
                 const labels = selected.map(c => c.parentElement.textContent.trim());
                 lvlToggle.textContent = labels.length ? labels.join(', ') : 'All Levels';
             }
+            if (urlRating && Array.from(ratingSel.options).some(o => o.value === urlRating)) {
+                ratingSel.value = urlRating;
+            }
         }
 
         function getFiltered() {
             const dept  = document.getElementById('department-select').value;
             const mgr   = document.getElementById('manager-select').value;
+            const rating = document.getElementById('rating-select').value;
             const lvlCheckboxes = document.querySelectorAll('#level-select-dropdown input[type="checkbox"]');
             const selectedLevels = [...lvlCheckboxes].filter(c=>c.checked).map(c=>c.value);
             return allData.filter(d =>
                 (!dept  || d.department===dept) &&
                 (!mgr   || d.manager===mgr) &&
+                (!rating || d.rating===rating) &&
                 (!selectedLevels.length || selectedLevels.includes(d.managementLevel))
             );
         }
