@@ -1339,6 +1339,7 @@
                 _dragWin = a.win;
                 row.classList.add('dragging');
                 e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', a.win);
             });
             row.addEventListener('dragend', () => {
                 row.classList.remove('dragging');
@@ -1372,7 +1373,7 @@
             info.className = 'assoc-info';
             info.innerHTML =
                 '<div class="assoc-name">'+(a.name||'—')+'</div>'+
-                '<div class="assoc-sub">'+getLevelLabel(a.managementLevel)+(a.department?' &middot; '+a.department:'')+'</div>';
+                '<div class="assoc-sub">'+getLevelLabel(a.managementLevel)+(a.jobProfile?' &middot; '+a.jobProfile:'')+'</div>';
             row.appendChild(info);
 
             row.addEventListener('click', ()=>openCard(a));
@@ -1415,8 +1416,9 @@
                 body.addEventListener('drop', e => {
                     e.preventDefault();
                     body.classList.remove('drag-over');
-                    if (!_dragWin) return;
-                    const assoc = allData.find(d => d.win === _dragWin);
+                    const win = e.dataTransfer.getData('text/plain') || _dragWin;
+                    if (!win) return;
+                    const assoc = allData.find(d => d.win === win);
                     if (!assoc || assoc.rating === cfg.key) return;
                     assoc.rating = cfg.key;
                     saveRatingOverride(assoc.win, cfg.key);
@@ -1459,8 +1461,9 @@
             nrBody.addEventListener('drop', e => {
                 e.preventDefault();
                 nrBody.classList.remove('drag-over');
-                if (!_dragWin) return;
-                const assoc = allData.find(d => d.win === _dragWin);
+                const win = e.dataTransfer.getData('text/plain') || _dragWin;
+                if (!win) return;
+                const assoc = allData.find(d => d.win === win);
                 if (!assoc || (!assoc.rating && !knownRatings.has(assoc.rating))) return;
                 assoc.rating = '';
                 saveRatingOverride(assoc.win, '');
