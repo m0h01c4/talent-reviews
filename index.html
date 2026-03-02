@@ -1396,7 +1396,7 @@
             if (dept)           params.set('dept', dept);
             if (levels.length)  params.set('levels', levels.join(','));
             const url = 'team-view.html' + (params.toString() ? '?' + params.toString() : '');
-            window.open(url, '_blank');
+            window.location.href = url;
         }
 
         function exportEditsToExcel() {
