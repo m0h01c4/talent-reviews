@@ -929,12 +929,16 @@
             sTA.parentNode.replaceChild(newSTA,   sTA);
             oTA.parentNode.replaceChild(newOTA,   oTA);
             nrTA.parentNode.replaceChild(newNRTA, nrTA);
+            // Re-apply values after clone (cloneNode may not preserve JS-set select state)
+            newReadinessSel.value  = saved.readiness || '';
+            newProjLevelSel.value  = saved.projectedLevel || '';
 
             function persist() {
                 a.strengths     = newSTA.value.split('\n').map(s=>s.trim()).filter(Boolean);
                 a.opportunities = newOTA.value.split('\n').map(s=>s.trim()).filter(Boolean);
                 a.futureRoles   = newNRTA.value.split('\n').map(s=>s.trim()).filter(Boolean);
                 localStorage.setItem(key, JSON.stringify({
+                    ...saved,
                     strengths:      a.strengths,
                     opportunities:  a.opportunities,
                     futureRoles:    a.futureRoles,
@@ -980,7 +984,7 @@
                 const storageKey = `tc_edits_${a.win}`;
                 const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
                 const ratingOverride = ratingOverrides[a.win];
-                const hasEdits = saved.strengths?.length || saved.opportunities?.length || saved.futureRoles?.length || saved.mobilityOverride || ratingOverride || saved.readiness || saved.projectedLevel || saved.devPrograms;
+                const hasEdits = saved.strengths?.length || saved.opportunities?.length || saved.futureRoles?.length || saved.mobilityOverride || ratingOverride || saved.readiness || saved.projectedLevel || saved.devPrograms || saved.careerSummary || saved.education || saved.experience;
                 if (!hasEdits) return;
 
                 let mobility = '';
@@ -990,19 +994,33 @@
                 else mobility = [a.mobilityLongTerm, a.mobilityShortTerm].filter(Boolean).join(' / ') || '';
                 if (saved.mobilityOverride) mobility = saved.mobilityOverride;
 
+                const expLabels = { ecomm: 'eComm', technology: 'Technology', global: 'Global', merchandising: 'Merchandising', operations: 'Operations', cluster: 'Cluster', 'cross-segment': 'Cross-Segment' };
+                const experience = saved.experience || {};
+                const expText = Object.keys(expLabels).filter(f => experience[f]).map(f => expLabels[f]).join(', ') || '';
+                const expScores = saved.experienceScores || {};
+                const expScoreText = [
+                    expScores.functional ? `Functional: ${expScores.functional}` : '',
+                    expScores.segment    ? `Segment: ${expScores.segment}` : '',
+                    expScores.digital    ? `Digital: ${expScores.digital}` : ''
+                ].filter(Boolean).join(' | ');
+
                 rows.push({
                     'Name':                 a.name || '',
                     'Title':                a.jobProfile || '',
                     'Department':           a.department || '',
                     'Level':                `${a.managementLevel} - ${a.managementLevelTitle || ''}`,
                     'Current Rating':       ratingOverride || a.rating || '',
+                    'Career Summary':       saved.careerSummary || '',
+                    'Education':            saved.education || '',
                     'Readiness':            saved.readiness || '',
                     'Projected Achievable Level': saved.projectedLevel || '',
                     'Development Programs': saved.devPrograms || '',
                     'Strengths':            (saved.strengths || []).join('\n'),
                     'Opportunities':        (saved.opportunities || []).join('\n'),
                     'Potential Next Roles': (saved.futureRoles || []).join('\n'),
-                    'Mobility':             mobility
+                    'Mobility':             mobility,
+                    'Experience':           expText,
+                    'Experience Scores':    expScoreText
                 });
             });
 
@@ -1015,8 +1033,8 @@
             const ws = XLSX.utils.json_to_sheet(rows);
             ws['!cols'] = [
                 { wch: 28 }, { wch: 40 }, { wch: 22 }, { wch: 22 }, { wch: 22 },
-                { wch: 12 }, { wch: 24 }, { wch: 40 },
-                { wch: 40 }, { wch: 40 }, { wch: 40 }, { wch: 16 }
+                { wch: 50 }, { wch: 30 }, { wch: 12 }, { wch: 24 }, { wch: 40 },
+                { wch: 40 }, { wch: 40 }, { wch: 40 }, { wch: 16 }, { wch: 40 }, { wch: 40 }
             ];
             XLSX.utils.book_append_sheet(wb, ws, 'Talent Card Edits');
             const date = new Date().toISOString().slice(0, 10);
