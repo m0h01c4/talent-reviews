@@ -1222,10 +1222,12 @@
                     <label class="form-label" for="filter-department">Department</label>
                     <select class="form-select" id="filter-department">
                         <option value="">All Departments</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Membership Insights">Membership Insights</option>
-                        <option value="Experience Strategy">Experience Strategy</option>
-                        <option value="MAP">MAP</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="filter-manager">Manager</label>
+                    <select class="form-select" id="filter-manager">
+                        <option value="">All Managers</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -1246,7 +1248,6 @@
                     <select class="form-select" id="filter-rating">
                         <option value="">All Ratings</option>
                     </select>
-                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="search-name">Associate Name</label>
@@ -1533,15 +1534,20 @@
         let sortDirection = "asc";
         let imageMap = {}; // name (lowercase) -> image filename
         const TV_RATING_OVERRIDES_KEY = 'tv_rating_overrides';
+        let refreshManagers = function() {}; // populated by populateDropdowns
 
         function openTeamView() {
             const dept   = document.getElementById('filter-department').value;
+            const mgr    = document.getElementById('filter-manager').value;
             const levels = Array.from(document.querySelectorAll('#filter-level-dropdown input:checked')).map(cb => cb.value);
             const rating = document.getElementById('filter-rating').value;
+            const name   = document.getElementById('search-name').value;
             const params = new URLSearchParams();
             if (dept)           params.set('dept', dept);
+            if (mgr)            params.set('mgr', mgr);
             if (levels.length)  params.set('levels', levels.join(','));
             if (rating)         params.set('rating', rating);
+            if (name)           params.set('name', name);
             const url = 'team-view.html' + (params.toString() ? '?' + params.toString() : '');
             window.location.href = url;
         }
@@ -1700,6 +1706,22 @@
                 option.textContent = dept;
                 deptSelect.appendChild(option);
             });
+
+            // Helper to refresh manager list based on selected department
+            refreshManagers = function() {
+                const dept = deptSelect.value;
+                const mgrSelect = document.getElementById('filter-manager');
+                const cur = mgrSelect.value;
+                while (mgrSelect.options.length > 1) mgrSelect.remove(1);
+                let pool = allData;
+                if (dept) pool = pool.filter(d => d.department === dept);
+                [...new Set(pool.map(d => d.manager).filter(Boolean))].sort()
+                    .forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; mgrSelect.appendChild(o); });
+                if ([...mgrSelect.options].some(o => o.value === cur)) mgrSelect.value = cur;
+            }
+            refreshManagers();
+            deptSelect.addEventListener('change', () => { refreshManagers(); applyFilters(); });
+            document.getElementById('filter-manager').addEventListener('change', applyFilters);
             
             // Get unique ratings (filter out empty)
             const ratings = [...new Set(allData.map(d => d.rating).filter(r => r && r.trim()))].sort();
@@ -1720,10 +1742,17 @@
             // Apply filter values passed back from team-view via URL parameters
             const urlParams = new URLSearchParams(window.location.search);
             const urlDept   = urlParams.get('dept');
+            const urlMgr    = urlParams.get('mgr');
             const urlLevels = urlParams.get('levels');
             const urlRating = urlParams.get('rating');
+            const urlName   = urlParams.get('name');
             if (urlDept && Array.from(deptSelect.options).some(o => o.value === urlDept)) {
                 deptSelect.value = urlDept;
+                refreshManagers();
+            }
+            if (urlMgr) {
+                const mgrSelect = document.getElementById('filter-manager');
+                if (Array.from(mgrSelect.options).some(o => o.value === urlMgr)) mgrSelect.value = urlMgr;
             }
             if (urlLevels) {
                 const lvlArr = urlLevels.split(',');
@@ -1735,7 +1764,10 @@
             if (urlRating && Array.from(ratingSelect.options).some(o => o.value === urlRating)) {
                 ratingSelect.value = urlRating;
             }
-            if (urlDept || urlLevels || urlRating) applyFilters();
+            if (urlName) {
+                document.getElementById('search-name').value = urlName;
+            }
+            if (urlDept || urlMgr || urlLevels || urlRating || urlName) applyFilters();
         }
 
         function renderTable() {
@@ -2029,16 +2061,18 @@
 
         function applyFilters() {
             const dept = document.getElementById('filter-department').value;
+            const mgr = document.getElementById('filter-manager').value;
             const rating = document.getElementById('filter-rating').value;
             const name = document.getElementById('search-name').value.toLowerCase();
             const selectedLevels = Array.from(document.querySelectorAll('#filter-level-dropdown input:checked')).map(cb => cb.value);
             
             filteredData = allData.filter(item => {
                 const deptMatch = !dept || item.department === dept;
+                const mgrMatch = !mgr || item.manager === mgr;
                 const ratingMatch = !rating || item.rating === rating;
                 const nameMatch = !name || (item.name || '').toLowerCase().includes(name);
                 const levelMatch = selectedLevels.length === 0 || selectedLevels.includes(item.managementLevel);
-                return deptMatch && ratingMatch && nameMatch && levelMatch;
+                return deptMatch && mgrMatch && ratingMatch && nameMatch && levelMatch;
             });
             
             // Show/hide disclaimer based on management level filter
@@ -2055,6 +2089,8 @@
 
         function resetFilters() {
             document.getElementById('filter-department').value = '';
+            refreshManagers();
+            document.getElementById('filter-manager').value = '';
             document.getElementById('filter-rating').value = '';
             document.getElementById('search-name').value = '';
             document.querySelectorAll('#filter-level-dropdown input').forEach(cb => cb.checked = false);
@@ -2377,7 +2413,6 @@
             document.getElementById('btn-export-pptx').addEventListener('click', exportToPowerPoint);
             
             // Auto-apply filters on change
-            document.getElementById('filter-department').addEventListener('change', applyFilters);
             document.getElementById('filter-rating').addEventListener('change', applyFilters);
             document.getElementById('search-name').addEventListener('input', applyFilters);
             document.querySelectorAll('#filter-level-dropdown input').forEach(cb => {

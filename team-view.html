@@ -989,6 +989,10 @@
                 <label for="rating-select">Talent Rating</label>
                 <select id="rating-select"><option value="">All Ratings</option></select>
             </div>
+            <div class="filter-group">
+                <label for="name-search">Associate Name</label>
+                <input type="text" id="name-search" placeholder="First or last name" style="width:100%;padding:6px 10px;border:1px solid #c0c7d0;border-radius:6px;font-size:13px;">
+            </div>
             <button class="btn-reset" id="reset-btn">Reset Filters</button>
         </div>
     </div>
@@ -1397,6 +1401,7 @@
                 refreshManagers();
                 document.getElementById('manager-select').selectedIndex=0;
                 ratingSel.selectedIndex=0;
+                document.getElementById('name-search').value='';
                 render();
             });
 
@@ -1407,11 +1412,13 @@
                 const mgr     = document.getElementById('manager-select').value;
                 const levels  = [...lvlCheckboxes].filter(c=>c.checked).map(c=>c.value);
                 const rating  = ratingSel.value;
+                const name    = document.getElementById('name-search').value;
                 const params  = new URLSearchParams();
                 if (dept)          params.set('dept', dept);
                 if (mgr)           params.set('mgr', mgr);
                 if (levels.length) params.set('levels', levels.join(','));
                 if (rating)        params.set('rating', rating);
+                if (name)          params.set('name', name);
                 window.location.href = 'index.html' + (params.toString() ? '?' + params.toString() : '');
             });
 
@@ -1421,6 +1428,7 @@
             const urlLevels = urlParams.get('levels');
             const urlRating = urlParams.get('rating');
             const urlMgr    = urlParams.get('mgr');
+            const urlName   = urlParams.get('name');
             if (urlDept && Array.from(deptSel.options).some(o => o.value === urlDept)) {
                 deptSel.value = urlDept;
                 refreshManagers();
@@ -1439,18 +1447,26 @@
             if (urlRating && Array.from(ratingSel.options).some(o => o.value === urlRating)) {
                 ratingSel.value = urlRating;
             }
+            if (urlName) {
+                document.getElementById('name-search').value = urlName;
+            }
+
+            // Wire up name search input
+            document.getElementById('name-search').addEventListener('input', render);
         }
 
         function getFiltered() {
             const dept  = document.getElementById('department-select').value;
             const mgr   = document.getElementById('manager-select').value;
             const rating = document.getElementById('rating-select').value;
+            const name  = document.getElementById('name-search').value.toLowerCase();
             const lvlCheckboxes = document.querySelectorAll('#level-select-dropdown input[type="checkbox"]');
             const selectedLevels = [...lvlCheckboxes].filter(c=>c.checked).map(c=>c.value);
             return allData.filter(d =>
                 (!dept  || d.department===dept) &&
                 (!mgr   || d.manager===mgr) &&
                 (!rating || d.rating===rating) &&
+                (!name  || (d.name||'').toLowerCase().includes(name)) &&
                 (!selectedLevels.length || selectedLevels.includes(d.managementLevel))
             );
         }
