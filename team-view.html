@@ -9,14 +9,20 @@
     <style>
         :root {
             --primary-blue: #0062AD;
+            --sapphire-blue: #00358E;
             --midnight-blue: #11224B;
             --ux-blue: #1D4B6D;
+            --tropical-blue: #35C4EC;
+            --sky-blue: #97EAFF;
+            --pool-blue: #42DFE0;
             --mid-gray: #7C878E;
             --light-gray: #D0D3D4;
             --gray-text: #6B7280;
             --border-gray: #D1D5DB;
             --success-green: #10B981;
             --error-red: #EF4444;
+            --accent-seaglass: #06ACB2;
+            --accent-magenta: #D946EF;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -262,42 +268,482 @@
 
         /* ── Talent Card Modal ── */
         .tc-overlay {
-            display: none; position: fixed; inset: 0;
-            background: rgba(17,34,75,0.55); z-index: 1000;
-            align-items: center; justify-content: center;
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(17,34,75,0.60);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
         }
         .tc-overlay.open { display: flex; }
+
         .tc-card {
-            background: #fff; border: 2.5px solid var(--midnight-blue);
-            border-radius: 18px; width: 720px; max-width: 95vw;
-            max-height: 90vh; overflow-y: auto; padding: 32px 36px 28px;
-            position: relative; box-shadow: 0 12px 40px rgba(17,34,75,0.18);
+            background: #fff;
+            border-radius: 16px;
+            width: 820px;
+            max-width: 96vw;
+            max-height: 92vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(17,34,75,0.28);
         }
+
+        /* ── Card Header ── */
+        .tc-header {
+            background: linear-gradient(135deg, var(--midnight-blue) 0%, var(--ux-blue) 100%);
+            border-radius: 16px 16px 0 0;
+            padding: 22px 28px 22px 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .tc-avatar {
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #D0D3D4;
+            flex-shrink: 0;
+            border: 3px solid rgba(255,255,255,0.35);
+        }
+
+        .tc-header-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .tc-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tc-role-line {
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 2px;
+        }
+        .tc-role-line strong { color: #fff; }
+
+        .tc-level-chip {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            padding: 2px 9px;
+            border-radius: 20px;
+            margin-top: 5px;
+        }
+
+        .tc-header-rating {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        .tc-header-rating-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.65);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .tc-header-rating-badge {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 8px;
+            text-align: center;
+            white-space: nowrap;
+            border: 2px solid rgba(255,255,255,0.4);
+            min-width: 110px;
+        }
+
         .tc-close {
-            position: absolute; top: 14px; right: 18px;
-            background: none; border: none; font-size: 1.6rem;
-            color: var(--midnight-blue); cursor: pointer; padding: 2px 6px;
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: rgba(255,255,255,0.15);
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.85);
+            cursor: pointer;
+            line-height: 1;
         }
-        .tc-close:hover { color: var(--error-red); }
-        .tc-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; }
-        .tc-identity { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
-        .tc-avatar { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; background: #D0D3D4; flex-shrink: 0; border: 2px solid var(--light-gray); }
-        .tc-name { font-size: 1.25rem; font-weight: 700; color: var(--midnight-blue); margin-bottom: 4px; }
-        .tc-role-line { font-size: 0.85rem; color: #333; margin-bottom: 2px; }
-        .tc-role-line strong { color: var(--midnight-blue); }
-        .tc-field { font-size: 0.875rem; color: #333; margin-bottom: 8px; }
-        .tc-field strong { color: var(--midnight-blue); font-weight: 600; }
-        .tc-section-label { font-size: 0.875rem; font-weight: 700; color: var(--midnight-blue); margin: 14px 0 4px; }
-        .tc-badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; background: #E8F0FB; color: var(--midnight-blue); }
-        .tc-rating-history { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
-        .tc-rating-row { display: flex; align-items: center; gap: 10px; }
-        .tc-rating-year { font-size: 0.78rem; color: var(--gray-text); min-width: 76px; flex-shrink: 0; }
-        .tc-right { border-left: 1px solid var(--light-gray); padding-left: 32px; }
-        .tc-textarea { width: 100%; min-height: 72px; padding: 8px 10px; font-size: 0.82rem; font-family: inherit; color: #333; border: 1.5px solid var(--border-gray); border-radius: 8px; resize: vertical; outline: none; background: #f9fafb; line-height: 1.5; transition: border-color 0.15s; }
-        .tc-textarea:focus { border-color: var(--primary-blue); background: #fff; }
-        .tc-textarea-hint { font-size: 0.72rem; color: #9CA3AF; margin-top: 3px; }
-        .tc-mob-sel { padding: 3px 8px; border: 1.5px solid var(--border-gray); border-radius: 6px; font-family: inherit; font-size: 0.82rem; color: #374151; background: #f9fafb; cursor: pointer; outline: none; margin-left: 2px; }
+        .tc-close:hover { background: rgba(239,68,68,0.8); color: #fff; }
+
+        /* ── Stats Row ── */
+        .tc-stats-row {
+            display: flex;
+            gap: 0;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .tc-stat-item {
+            flex: 1;
+            padding: 10px 16px;
+            border-right: 1px solid var(--border-gray);
+        }
+        .tc-stat-item:last-child { border-right: none; }
+
+        .tc-stat-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--mid-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            margin-bottom: 3px;
+        }
+
+        .tc-stat-value {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--midnight-blue);
+        }
+
+        /* ── Card Body ── */
+        .tc-body {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 0;
+            min-height: 0;
+        }
+
+        .tc-left {
+            border-right: 1px solid var(--border-gray);
+            padding: 18px 20px;
+        }
+
+        .tc-right {
+            padding: 18px 24px;
+        }
+
+        .tc-section-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin: 14px 0 6px;
+        }
+        .tc-section-label:first-child { margin-top: 0; }
+
+        .tc-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #E8F0FB;
+            color: var(--midnight-blue);
+        }
+
+        .tc-field {
+            font-size: 0.82rem;
+            color: #333;
+            margin-bottom: 6px;
+        }
+        .tc-field strong {
+            color: var(--midnight-blue);
+            font-weight: 600;
+        }
+
+        .tc-textarea {
+            width: 100%;
+            min-height: 72px;
+            padding: 8px 10px;
+            font-size: 0.82rem;
+            font-family: inherit;
+            color: #333;
+            border: 1.5px solid var(--border-gray);
+            border-radius: 8px;
+            resize: vertical;
+            outline: none;
+            background: #f9fafb;
+            line-height: 1.5;
+            transition: border-color 0.15s;
+        }
+        .tc-textarea:focus {
+            border-color: var(--primary-blue);
+            background: #fff;
+        }
+        .tc-textarea-hint {
+            font-size: 0.68rem;
+            color: #9CA3AF;
+            margin-top: 3px;
+        }
+        .tc-mob-sel {
+            padding: 3px 8px;
+            border: 1.5px solid var(--border-gray);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.82rem;
+            color: #374151;
+            background: #f9fafb;
+            cursor: pointer;
+            outline: none;
+            margin-left: 2px;
+        }
         .tc-mob-sel:focus { border-color: var(--primary-blue); }
+        .tc-mob-unlisted {
+            font-size: 0.72rem;
+            color: #9CA3AF;
+            font-style: normal;
+        }
+
+        .tc-rating-history {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-top: 4px;
+        }
+        .tc-rating-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tc-rating-year {
+            font-size: 0.75rem;
+            color: var(--gray-text);
+            min-width: 68px;
+            flex-shrink: 0;
+        }
+
+        /* ── Career Summary ── */
+        .tc-career-summary-section {
+            padding: 12px 24px 4px;
+            border-bottom: 1px solid var(--border-gray);
+            background: #fff;
+        }
+        .tc-career-summary-section .tc-section-label { margin-top: 0; }
+
+        /* ── Education inline input ── */
+        .tc-inline-edit {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--midnight-blue);
+            font-family: inherit;
+            padding: 0;
+        }
+        .tc-inline-edit::placeholder { color: #9CA3AF; font-weight: 400; }
+        .tc-inline-edit:focus { border-bottom: 1.5px solid var(--primary-blue); }
+
+        /* ── Experience Scoring Table ── */
+        .tc-scoring-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            font-size: 0.8rem;
+        }
+        .tc-scoring-table th {
+            text-align: left;
+            padding: 5px 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--midnight-blue);
+            border-bottom: 2px solid var(--border-gray);
+            background: #f3f4f6;
+        }
+        .tc-scoring-table td {
+            padding: 5px 6px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+            vertical-align: middle;
+        }
+        .tc-scoring-table select {
+            padding: 3px 6px;
+            border: 1px solid var(--border-gray);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.78rem;
+            color: #374151;
+            background: #f9fafb;
+            cursor: pointer;
+            width: 100%;
+        }
+        .tc-scoring-table select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+        .tc-cat-wrap {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            cursor: default;
+        }
+        .tc-cat-wrap .tc-info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            color: white;
+            font-size: 9px;
+            font-weight: 700;
+            flex-shrink: 0;
+            cursor: help;
+        }
+        .tc-cat-wrap .tc-tooltip {
+            display: none;
+            position: absolute;
+            left: 0;
+            top: calc(100% + 4px);
+            z-index: 100;
+            background: var(--midnight-blue);
+            color: white;
+            font-size: 0.72rem;
+            font-weight: 400;
+            line-height: 1.45;
+            padding: 8px 10px;
+            border-radius: 6px;
+            width: 220px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+            pointer-events: none;
+        }
+        .tc-cat-wrap:hover .tc-tooltip { display: block; }
+        .tc-rating-guide-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            font-family: inherit;
+            font-size: 0.72rem;
+            color: var(--primary-blue);
+            text-decoration: underline;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .tc-rating-guide-btn:hover { color: var(--sapphire-blue); }
+        .tc-rating-guide-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(17,34,75,0.60);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .tc-rating-guide-overlay.open { display: flex; }
+        .tc-rating-guide-modal {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            max-width: 660px;
+            width: 94vw;
+            box-shadow: 0 20px 60px rgba(17,34,75,0.28);
+            position: relative;
+        }
+        .tc-rating-guide-modal h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--midnight-blue);
+            margin-bottom: 14px;
+        }
+        .tc-rating-guide-modal .tc-close-guide {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            font-size: 1.3rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--mid-gray);
+            line-height: 1;
+        }
+        .tc-rating-guide-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+        .tc-rating-guide-table th {
+            background: var(--midnight-blue);
+            color: white;
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        .tc-rating-guide-table td {
+            padding: 7px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+        }
+        .tc-rating-guide-table tr:nth-child(even) td { background: #f9fafb; }
+        .tc-rating-level-badge {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 0.78rem;
+            color: white;
+        }
+        .tc-badge-1 { background: #EF4444; }
+        .tc-badge-2 { background: #EAB308; }
+        .tc-badge-3 { background: #10B981; }
+
+        /* ── Experience checkboxes ── */
+        .tc-exp-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 4px;
+        }
+        .tc-exp-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.8rem;
+            color: #374151;
+            cursor: pointer;
+        }
+        .tc-exp-item input[type="checkbox"] {
+            accent-color: var(--primary-blue);
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* ── form-select (used for readiness/projected level) ── */
+        .form-select {
+            padding: 10px 12px;
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--gray-text);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
 
         /* Multi-select filter */
         .multi-select { position: relative; }
@@ -409,64 +855,224 @@
 
     <!-- Talent Card Modal -->
     <div class="tc-overlay" id="tc-overlay">
-        <div class="tc-card">
-            <button class="tc-close" id="tc-close">&times;</button>
+        <div class="tc-card" id="tc-card">
+            <button class="tc-close" id="tc-close" title="Close">&times;</button>
+            <!-- Header -->
+            <div class="tc-header">
+                <img class="tc-avatar" id="tc-avatar" src="" alt="Photo">
+                <div class="tc-header-info">
+                    <div class="tc-name" id="tc-name"></div>
+                    <div class="tc-role-line" id="tc-current-role"></div>
+                    <div class="tc-role-line" id="tc-dept-line"></div>
+                    <span class="tc-level-chip" id="tc-level-chip"></span>
+                </div>
+                <div class="tc-header-rating">
+                    <div class="tc-header-rating-label">Talent Rating</div>
+                    <div class="tc-header-rating-badge" id="tc-header-rating-badge"></div>
+                </div>
+            </div>
+            <!-- Stats Row -->
+            <div class="tc-stats-row">
+                <div class="tc-stat-item">
+                    <div class="tc-stat-label">WMT Tenure</div>
+                    <div class="tc-stat-value" id="tc-tenure"></div>
+                </div>
+                <div class="tc-stat-item">
+                    <div class="tc-stat-label">Role Tenure</div>
+                    <div class="tc-stat-value" id="tc-role-tenure"></div>
+                </div>
+                <div class="tc-stat-item">
+                    <div class="tc-stat-label">Mobility</div>
+                    <div class="tc-stat-value"><span id="tc-mobility"></span><select id="tc-mobility-sel" class="tc-mob-sel" style="display:none"><option value="">Select…</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                </div>
+                <div class="tc-stat-item">
+                    <div class="tc-stat-label">Education</div>
+                    <div class="tc-stat-value"><input type="text" id="tc-education" class="tc-inline-edit" placeholder="Add education…"></div>
+                </div>
+                <div class="tc-stat-item">
+                    <div class="tc-stat-label">Org / Market</div>
+                    <div class="tc-stat-value" id="tc-org"></div>
+                </div>
+            </div>
+            <!-- Career Summary -->
+            <div class="tc-career-summary-section">
+                <div class="tc-section-label">Career Summary</div>
+                <textarea class="tc-textarea" id="tc-career-summary" placeholder="Enter career summary…" style="min-height:58px;"></textarea>
+            </div>
+            <!-- Body -->
             <div class="tc-body">
+                <!-- Left: Rating Histories -->
                 <div class="tc-left">
-                    <div class="tc-identity">
-                        <img class="tc-avatar" id="tc-avatar" src="" alt="Photo">
-                        <div>
-                            <div class="tc-name" id="tc-name"></div>
-                            <div class="tc-role-line"><strong>Current Role:</strong> <span id="tc-current-role"></span></div>
+                    <div class="tc-section-label">Talent Rating History</div>
+                    <div class="tc-rating-history">
+                        <div class="tc-rating-row">
+                            <span class="tc-rating-year">Current</span>
+                            <span class="tc-badge" id="tc-rating"></span>
+                        </div>
+                        <div class="tc-rating-row">
+                            <span class="tc-rating-year">Last Year</span>
+                            <span class="tc-badge" id="tc-rating-ly"></span>
+                        </div>
+                        <div class="tc-rating-row">
+                            <span class="tc-rating-year">2 Years Ago</span>
+                            <span class="tc-badge" id="tc-rating-2y"></span>
                         </div>
                     </div>
-                    <div class="tc-field"><strong>WMT Tenure:</strong> <span id="tc-tenure"></span></div>
-                    <div class="tc-field"><strong>Role Tenure:</strong> <span id="tc-role-tenure"></span></div>
-                    <div class="tc-section-label">Talent Rating History:</div>
+                    <div class="tc-section-label">Performance Rating History</div>
                     <div class="tc-rating-history">
-                        <div class="tc-rating-row"><span class="tc-rating-year">Current</span><span class="tc-badge" id="tc-rating"></span></div>
-                        <div class="tc-rating-row"><span class="tc-rating-year">Last Year</span><span class="tc-badge" id="tc-rating-ly"></span></div>
-                        <div class="tc-rating-row"><span class="tc-rating-year">2 Years Ago</span><span class="tc-badge" id="tc-rating-2y"></span></div>
+                        <div class="tc-rating-row">
+                            <span class="tc-rating-year">Current</span>
+                            <span class="tc-badge" id="tc-perf"></span>
+                        </div>
+                        <div class="tc-rating-row">
+                            <span class="tc-rating-year">Last Year</span>
+                            <span class="tc-badge" id="tc-perf-ly"></span>
+                        </div>
+                        <div class="tc-rating-row">
+                            <span class="tc-rating-year">2 Years Ago</span>
+                            <span class="tc-badge" id="tc-perf-2y"></span>
+                        </div>
                     </div>
-                    <div class="tc-section-label" style="margin-top:10px">Potential Next Role(s):</div>
-                    <textarea class="tc-textarea" id="tc-next-roles" placeholder="Enter potential next roles, one per line..."></textarea>
-                    <div class="tc-textarea-hint">One role per line</div>
-                    <div class="tc-field" style="margin-top:12px"><strong>Mobility:</strong> <span id="tc-mobility"></span><select id="tc-mobility-sel" class="tc-mob-sel" style="display:none"><option value="">Select…</option><option value="Yes">Yes</option><option value="No">No</option></select></div>
+                    <div class="tc-section-label">Experience</div>
+                    <div class="tc-exp-grid">
+                        <label class="tc-exp-item"><input type="checkbox" id="tc-exp-ecomm"> eComm</label>
+                        <label class="tc-exp-item"><input type="checkbox" id="tc-exp-technology"> Technology</label>
+                        <label class="tc-exp-item"><input type="checkbox" id="tc-exp-global"> Global</label>
+                        <label class="tc-exp-item"><input type="checkbox" id="tc-exp-merchandising"> Merchandising</label>
+                        <label class="tc-exp-item"><input type="checkbox" id="tc-exp-operations"> Operations</label>
+                        <label class="tc-exp-item"><input type="checkbox" id="tc-exp-cluster"> Cluster</label>
+                        <label class="tc-exp-item"><input type="checkbox" id="tc-exp-cross-segment"> Cross-Segment</label>
+                    </div>
+                    <!-- Experience Scoring Table -->
+                    <table class="tc-scoring-table" id="tc-scoring-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>
+                                    Rating&nbsp;
+                                    <button class="tc-rating-guide-btn" id="tc-rating-guide-open" title="View rating definitions">📋 Guide</button>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span class="tc-cat-wrap">
+                                        Functional Experience
+                                        <span class="tc-info-icon">i</span>
+                                        <span class="tc-tooltip">Supply Chain, Operations, eComm and Merch. 1=Red, 2=Yellow, 3=Green.</span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <select id="tc-score-functional">
+                                        <option value="">Select…</option>
+                                        <option value="1">1 – Red</option>
+                                        <option value="2">2 – Yellow</option>
+                                        <option value="3">3 – Green</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="tc-cat-wrap">
+                                        Segment Experience
+                                        <span class="tc-info-icon">i</span>
+                                        <span class="tc-tooltip">Sam's Club, WMUS and International. 1=Red, 2=Yellow, 3=Green.</span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <select id="tc-score-segment">
+                                        <option value="">Select…</option>
+                                        <option value="1">1 – Red</option>
+                                        <option value="2">2 – Yellow</option>
+                                        <option value="3">3 – Green</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="tc-cat-wrap">
+                                        Digital &amp; Technical Acumen
+                                        <span class="tc-info-icon">i</span>
+                                        <span class="tc-tooltip">A subjective judgment on overall acumen — a combination of experience in digital-focused roles and how the individual is showing up: leaning into digital, incorporating it into their teams and normal course of business. Key questions: Has the individual worked in Digital/Tech? How are they incorporating and talking about tech, AI, etc. on the regular? 1=Red, 2=Yellow, 3=Green.</span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <select id="tc-score-digital">
+                                        <option value="">Select…</option>
+                                        <option value="1">1 – Red</option>
+                                        <option value="2">2 – Yellow</option>
+                                        <option value="3">3 – Green</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
+                <!-- Right: Editable Sections -->
                 <div class="tc-right">
-                    <div class="tc-field"><strong>Function:</strong> <span id="tc-function"></span></div>
-                    <div class="tc-field"><strong>Org / Market:</strong> <span id="tc-org"></span></div>
-                    <div class="tc-section-label" style="margin-top:14px">Performance Rating History:</div>
-                    <div class="tc-rating-history">
-                        <div class="tc-rating-row"><span class="tc-rating-year">Current</span><span class="tc-badge" id="tc-perf"></span></div>
-                        <div class="tc-rating-row"><span class="tc-rating-year">Last Year</span><span class="tc-badge" id="tc-perf-ly"></span></div>
-                        <div class="tc-rating-row"><span class="tc-rating-year">2 Years Ago</span><span class="tc-badge" id="tc-perf-2y"></span></div>
-                    </div>
-                    <div class="tc-section-label" style="margin-top:14px">Readiness:</div>
-                    <select class="tc-mob-sel" id="tc-readiness" style="width:100%;margin-bottom:4px;">
+                    <div class="tc-section-label">Readiness</div>
+                    <select class="form-select" id="tc-readiness" style="width:100%;margin-bottom:4px;">
                         <option value="">Select…</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
                         <option value="3+">3+</option>
                     </select>
-                    <div class="tc-section-label" style="margin-top:10px">Projected Achievable Level:</div>
-                    <select class="tc-mob-sel" id="tc-projected-level" style="width:100%;margin-bottom:4px;">
+                    <div class="tc-section-label">Projected Achievable Level</div>
+                    <select class="form-select" id="tc-projected-level" style="width:100%;margin-bottom:4px;">
                         <option value="">Select…</option>
                         <option value="1 Level">1 Level</option>
                         <option value="2 Level">2 Level</option>
                         <option value="2+ Level">2+ Level</option>
                     </select>
-                    <div class="tc-section-label" style="margin-top:10px">Development Programs:</div>
+                    <div class="tc-section-label">Development Programs</div>
                     <textarea class="tc-textarea" id="tc-dev-programs" placeholder="Development Programs…" style="min-height:48px;"></textarea>
-                    <div class="tc-section-label" style="margin-top:14px">Strengths:</div>
-                    <textarea class="tc-textarea" id="tc-strengths" placeholder="Enter strengths, one per line..."></textarea>
-                    <div class="tc-textarea-hint">One strength per line</div>
-                    <div class="tc-section-label" style="margin-top:10px">Opportunities:</div>
-                    <textarea class="tc-textarea" id="tc-opportunities" placeholder="Enter opportunities, one per line..."></textarea>
-                    <div class="tc-textarea-hint">One opportunity per line</div>
-                    <div id="tc-save-indicator" style="opacity:0;transition:opacity 0.4s;font-size:0.75rem;color:#10B981;font-weight:600;margin-top:6px;text-align:right;">&#10003; Saved</div>
+                    <div class="tc-section-label">Strengths</div>
+                    <textarea class="tc-textarea" id="tc-strengths" placeholder="Enter strengths, one per line…"></textarea>
+                    <div class="tc-textarea-hint">One per line</div>
+                    <div class="tc-section-label">Opportunities / Development Focus</div>
+                    <textarea class="tc-textarea" id="tc-opportunities" placeholder="Enter opportunities, one per line…"></textarea>
+                    <div class="tc-textarea-hint">One per line</div>
+                    <div class="tc-section-label">Potential Next Role(s)</div>
+                    <textarea class="tc-textarea" id="tc-next-roles" placeholder="Enter potential next roles, one per line…"></textarea>
+                    <div class="tc-textarea-hint">One per line</div>
+                    <div id="tc-save-indicator" style="opacity:0;transition:opacity 0.4s;font-size:0.72rem;color:#10B981;font-weight:600;margin-top:6px;text-align:right;">✓ Saved</div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Rating Guide Modal -->
+    <div class="tc-rating-guide-overlay" id="tc-rating-guide-overlay">
+        <div class="tc-rating-guide-modal">
+            <button class="tc-close-guide" id="tc-close-guide" aria-label="Close rating guide">&times;</button>
+            <h3>Experience Rating Guide</h3>
+            <table class="tc-rating-guide-table">
+                <thead>
+                    <tr>
+                        <th style="width:90px">Rating</th>
+                        <th>Level</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="tc-rating-level-badge tc-badge-1">1</span></td>
+                        <td><strong>Red</strong></td>
+                        <td>Limited experience in this area; actively developing foundational knowledge.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tc-rating-level-badge tc-badge-2">2</span></td>
+                        <td><strong>Yellow</strong></td>
+                        <td>Moderate experience; building competence with some demonstrated application.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tc-rating-level-badge tc-badge-3">3</span></td>
+                        <td><strong>Green</strong></td>
+                        <td>Strong experience; consistently demonstrates depth and breadth in this area.</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -843,15 +1449,29 @@
         const tcOverlay = document.getElementById('tc-overlay');
         document.getElementById('tc-close').addEventListener('click', ()=>tcOverlay.classList.remove('open'));
         tcOverlay.addEventListener('click', e=>{ if(e.target===tcOverlay) tcOverlay.classList.remove('open'); });
-        document.addEventListener('keydown', e=>{ if(e.key==='Escape') tcOverlay.classList.remove('open'); });
+        document.addEventListener('keydown', e=>{
+            if(e.key==='Escape') {
+                const guideOverlay = document.getElementById('tc-rating-guide-overlay');
+                if(guideOverlay && guideOverlay.classList.contains('open')) {
+                    guideOverlay.classList.remove('open');
+                    return;
+                }
+                tcOverlay.classList.remove('open');
+            }
+        });
 
-        function applyBadge(id, val, colorMap) {
-            const el = document.getElementById(id);
-            el.textContent = val||'N/A';
-            const bg = colorMap[val]||'#E8F0FB';
-            el.style.background = bg;
-            el.style.color = ['#7AB648','#0071CE','#FF6D00','#EF4444'].includes(bg)?'#fff':'#11224B';
-        }
+        // Rating guide modal
+        const ratingGuideOverlay = document.getElementById('tc-rating-guide-overlay');
+        document.getElementById('tc-rating-guide-open').addEventListener('click', function(e) {
+            e.stopPropagation();
+            ratingGuideOverlay.classList.add('open');
+        });
+        document.getElementById('tc-close-guide').addEventListener('click', function() {
+            ratingGuideOverlay.classList.remove('open');
+        });
+        ratingGuideOverlay.addEventListener('click', function(e) {
+            if(e.target === ratingGuideOverlay) ratingGuideOverlay.classList.remove('open');
+        });
 
         function openCard(a) {
             currentAssoc = a;
@@ -859,65 +1479,129 @@
             // Avatar
             const avatarEl = document.getElementById('tc-avatar');
             const imgSrc = getImgSrc(a);
-            avatarEl.src = imgSrc || '';
-            avatarEl.style.display = imgSrc ? 'block' : 'none';
-            avatarEl.onerror = ()=>{ avatarEl.style.display='none'; };
+            avatarEl.src = imgSrc || 'default.png';
+            avatarEl.onerror = function() { this.src = 'default.png'; };
 
-            document.getElementById('tc-name').textContent = a.name||'&#8212;';
-            document.getElementById('tc-current-role').textContent = a.jobProfile||'&#8212;';
+            // Header: Identity
+            document.getElementById('tc-name').textContent = a.name || '—';
+            document.getElementById('tc-current-role').textContent = a.jobProfile || '—';
+            document.getElementById('tc-dept-line').textContent = a.department || '—';
+            const levelChip = document.getElementById('tc-level-chip');
+            const levelLabel = a.managementLevelTitle ? `${a.managementLevel} – ${a.managementLevelTitle}` : (a.managementLevel || '');
+            levelChip.textContent = levelLabel;
+            levelChip.style.display = levelLabel ? 'inline-block' : 'none';
 
-            const ten = parseFloat(a.tenureYears);
-            const rol = parseFloat(a.roleTenureYears);
-            document.getElementById('tc-tenure').textContent = isNaN(ten) ? (a.tenure||'&#8212;') : ten.toFixed(1)+' yrs';
-            document.getElementById('tc-role-tenure').textContent = isNaN(rol) ? (a.roleTenure||'&#8212;') : rol.toFixed(2)+' yrs';
+            // Tenure
+            const tenYrs = parseFloat(a.tenureYears);
+            const rolYrs = parseFloat(a.roleTenureYears);
+            document.getElementById('tc-tenure').textContent = isNaN(tenYrs) ? (a.tenure || '—') : tenYrs.toFixed(1) + ' Yrs';
+            document.getElementById('tc-role-tenure').textContent = isNaN(rolYrs) ? (a.roleTenure || '—') : rolYrs.toFixed(2) + ' Yrs';
 
-            applyBadge('tc-rating',    a.rating,               RATING_COLORS);
-            applyBadge('tc-rating-ly', a.lastYearRating,       RATING_COLORS);
-            applyBadge('tc-rating-2y', a.twoYearsAgoRating,    RATING_COLORS);
-            applyBadge('tc-perf',      a.perfRating,           PERF_COLORS);
-            applyBadge('tc-perf-ly',   a.oneYearAgoPerfRating, PERF_COLORS);
-            applyBadge('tc-perf-2y',   a.twoYearAgoPerfRating, PERF_COLORS);
+            // Stats row: Org
+            document.getElementById('tc-org').textContent = a.department || a.costCenter || '—';
 
-            document.getElementById('tc-function').textContent = a.jobFamilyGroup||a.jobFamily||'&#8212;';
-            document.getElementById('tc-org').textContent = a.department||'&#8212;';
-
-            let mob = '&#8212;';
-            if (a.mobilityLongTerm==='Yes' && a.mobilityShortTerm==='Yes') mob = 'Global';
-            else if (a.mobilityLongTerm==='Yes') mob = 'Long-term';
-            else if (a.mobilityShortTerm==='Yes') mob = 'Short-term';
-            else if (a.mobilityLongTerm==='No' && a.mobilityShortTerm==='No') mob = 'No mobility';
-            else mob = [a.mobilityLongTerm,a.mobilityShortTerm].filter(Boolean).join(' / ')||'&#8212;';
+            // Mobility
+            let mob = '—';
+            if (a.mobilityLongTerm === 'Yes' && a.mobilityShortTerm === 'Yes') mob = 'Global';
+            else if (a.mobilityLongTerm === 'Yes') mob = 'Limited';
+            else if (a.mobilityLongTerm === 'No' && a.mobilityShortTerm === 'No') mob = 'No';
+            else mob = [a.mobilityLongTerm, a.mobilityShortTerm].filter(Boolean).join(' / ') || '—';
 
             const mobSpan = document.getElementById('tc-mobility');
             const mobSelEl = document.getElementById('tc-mobility-sel');
-            if (mob === '&#8212;') {
-                const _mobKey = 'tc_edits_'+(a.win||a.name||'unknown');
-                const _mobSaved = JSON.parse(localStorage.getItem(_mobKey)||'{}');
+            if (mob === '—') {
+                const _mobKey = 'tc_edits_' + (a.win || a.name || 'unknown');
+                const _mobSaved = JSON.parse(localStorage.getItem(_mobKey) || '{}');
                 mobSpan.style.display = '';
-                mobSpan.innerHTML = '<em style="color:#9CA3AF;font-style:normal">Not listed &mdash; please select:</em>';
+                mobSpan.innerHTML = '<em class="tc-mob-unlisted">Not listed &mdash; select:</em>';
                 const newMobSel = mobSelEl.cloneNode(true);
                 newMobSel.value = _mobSaved.mobilityOverride || '';
                 newMobSel.style.display = '';
                 mobSelEl.parentNode.replaceChild(newMobSel, mobSelEl);
                 newMobSel.addEventListener('change', () => {
-                    const _cur = JSON.parse(localStorage.getItem(_mobKey)||'{}');
+                    const _cur = JSON.parse(localStorage.getItem(_mobKey) || '{}');
                     _cur.mobilityOverride = newMobSel.value;
                     localStorage.setItem(_mobKey, JSON.stringify(_cur));
-                    const ind = document.getElementById('tc-save-indicator');
-                    if (ind) { ind.style.opacity='1'; clearTimeout(ind._t); ind._t=setTimeout(()=>ind.style.opacity='0',1500); }
+                    const hint = document.getElementById('tc-save-indicator');
+                    if (hint) { hint.style.opacity = '1'; clearTimeout(hint._t); hint._t = setTimeout(() => hint.style.opacity = '0', 1500); }
                 });
             } else {
                 mobSpan.style.display = '';
-                mobSpan.innerHTML = mob;
+                mobSpan.textContent = mob;
                 mobSelEl.style.display = 'none';
             }
 
+            // Ratings with color badge
+            const ratingColors = {
+                'High Potential':       '#7AB648',
+                'Valued Contributor':   '#0071CE',
+                'Subject Matter Expert':'#FFC107',
+                'Talent Risk':          '#FF6D00',
+                'Too New To Rate':      '#7EC8E3',
+                'Not Rated':            '#BDBDBD'
+            };
+            function applyRatingBadge(elId, value) {
+                const el = document.getElementById(elId);
+                el.textContent = value || 'N/A';
+                el.style.background = ratingColors[value] || '#E8E8E8';
+                el.style.color = ['High Potential','Valued Contributor','Talent Risk'].includes(value) ? '#fff' : '#11224B';
+            }
+            const currentRating = RATING_OVERRIDES[a.win] || a.rating;
+            applyRatingBadge('tc-rating',    currentRating);
+            applyRatingBadge('tc-rating-ly', a.lastYearRating);
+            applyRatingBadge('tc-rating-2y', a.twoYearsAgoRating);
+
+            // Header rating badge
+            const headerBadge = document.getElementById('tc-header-rating-badge');
+            headerBadge.textContent = currentRating || 'Not Rated';
+            headerBadge.style.background = ratingColors[currentRating] ? ratingColors[currentRating] + 'CC' : 'rgba(255,255,255,0.2)';
+
+            function applyPerfBadge(elId, value) {
+                const perfColors = {
+                    'Outstanding':        '#7AB648',
+                    'Successful':         '#0071CE',
+                    'Improvement Needed': '#FF6D00',
+                    'Unsatisfactory':     '#EF4444'
+                };
+                const el = document.getElementById(elId);
+                el.textContent = value || 'N/A';
+                el.style.background = perfColors[value] || '#E8F0FB';
+                el.style.color = ['Outstanding','Successful'].includes(value) ? '#fff' : '#11224B';
+            }
+            applyPerfBadge('tc-perf',    a.perfRating);
+            applyPerfBadge('tc-perf-ly', a.oneYearAgoPerfRating);
+            applyPerfBadge('tc-perf-2y', a.twoYearAgoPerfRating);
+
             // Editable textareas + localStorage
-            const key = 'tc_edits_'+(a.win||a.name||'unknown');
-            const saved = JSON.parse(localStorage.getItem(key)||'{}');
-            if(saved.strengths)     a.strengths=saved.strengths;
-            if(saved.opportunities) a.opportunities=saved.opportunities;
-            if(saved.futureRoles)   a.futureRoles=saved.futureRoles;
+            const key = 'tc_edits_' + (a.win || a.name || 'unknown');
+            const saved = JSON.parse(localStorage.getItem(key) || '{}');
+
+            // Merge: saved edits take priority over base data
+            if (saved.strengths)     a.strengths     = saved.strengths;
+            if (saved.opportunities) a.opportunities = saved.opportunities;
+            if (saved.futureRoles)   a.futureRoles   = saved.futureRoles;
+
+            // Career Summary
+            const careerSummaryTA = document.getElementById('tc-career-summary');
+            careerSummaryTA.value = saved.careerSummary || '';
+
+            // Education
+            const educationEl = document.getElementById('tc-education');
+            educationEl.value = saved.education || '';
+
+            // Experience checkboxes
+            const expFields = ['ecomm','technology','global','merchandising','operations','cluster','cross-segment'];
+            expFields.forEach(function(f) {
+                const cb = document.getElementById('tc-exp-' + f);
+                if (cb) cb.checked = !!(saved.experience && saved.experience[f]);
+            });
+
+            // Experience scoring selects
+            const scoreFields = ['functional', 'segment', 'digital'];
+            scoreFields.forEach(function(f) {
+                const sel = document.getElementById('tc-score-' + f);
+                if (sel) sel.value = (saved.experienceScores && saved.experienceScores[f]) || '';
+            });
 
             const readinessSel  = document.getElementById('tc-readiness');
             const projLevelSel  = document.getElementById('tc-projected-level');
@@ -928,49 +1612,86 @@
             readinessSel.value  = saved.readiness || '';
             projLevelSel.value  = saved.projectedLevel || '';
             devProgramsTA.value = saved.devPrograms || '';
-            sTA.value  = (a.strengths||[]).join('\n');
-            oTA.value  = (a.opportunities||[]).join('\n');
-            nrTA.value = (a.futureRoles||a.potentialNextRoles||[]).join('\n');
+            sTA.value  = (a.strengths || []).join('\n');
+            oTA.value  = (a.opportunities || a.devFocus || []).join('\n');
+            nrTA.value = (a.futureRoles || a.potentialNextRoles || []).join('\n');
 
             // Clone to remove old event listeners
-            const newReadinessSel  = readinessSel.cloneNode(true);
-            const newProjLevelSel  = projLevelSel.cloneNode(true);
-            const newDevProgramsTA = devProgramsTA.cloneNode(true);
+            const newCareerSummaryTA = careerSummaryTA.cloneNode(true);
+            const newEducationEl     = educationEl.cloneNode(true);
+            const newReadinessSel    = readinessSel.cloneNode(true);
+            const newProjLevelSel    = projLevelSel.cloneNode(true);
+            const newDevProgramsTA   = devProgramsTA.cloneNode(true);
             const newSTA  = sTA.cloneNode(true);
             const newOTA  = oTA.cloneNode(true);
             const newNRTA = nrTA.cloneNode(true);
-            readinessSel.parentNode.replaceChild(newReadinessSel,   readinessSel);
-            projLevelSel.parentNode.replaceChild(newProjLevelSel,   projLevelSel);
+            careerSummaryTA.parentNode.replaceChild(newCareerSummaryTA, careerSummaryTA);
+            educationEl.parentNode.replaceChild(newEducationEl, educationEl);
+            readinessSel.parentNode.replaceChild(newReadinessSel, readinessSel);
+            projLevelSel.parentNode.replaceChild(newProjLevelSel, projLevelSel);
             devProgramsTA.parentNode.replaceChild(newDevProgramsTA, devProgramsTA);
-            sTA.parentNode.replaceChild(newSTA,   sTA);
-            oTA.parentNode.replaceChild(newOTA,   oTA);
+            sTA.parentNode.replaceChild(newSTA, sTA);
+            oTA.parentNode.replaceChild(newOTA, oTA);
             nrTA.parentNode.replaceChild(newNRTA, nrTA);
-            // Re-apply values after clone (cloneNode may not preserve JS-set select state)
-            newReadinessSel.value  = saved.readiness || '';
-            newProjLevelSel.value  = saved.projectedLevel || '';
+            // Re-apply select values after clone
+            newReadinessSel.value = saved.readiness || '';
+            newProjLevelSel.value = saved.projectedLevel || '';
+
+            // Re-bind experience checkbox clones
+            const newExpCbs = {};
+            expFields.forEach(function(f) {
+                const orig = document.getElementById('tc-exp-' + f);
+                if (!orig) return;
+                const clone = orig.cloneNode(true);
+                orig.parentNode.replaceChild(clone, orig);
+                newExpCbs[f] = clone;
+            });
+
+            // Re-bind experience score select clones
+            const newScoreSels = {};
+            scoreFields.forEach(function(f) {
+                const orig = document.getElementById('tc-score-' + f);
+                if (!orig) return;
+                const clone = orig.cloneNode(true);
+                orig.parentNode.replaceChild(clone, orig);
+                clone.value = (saved.experienceScores && saved.experienceScores[f]) || '';
+                newScoreSels[f] = clone;
+            });
 
             function persist() {
-                a.strengths     = newSTA.value.split('\n').map(s=>s.trim()).filter(Boolean);
-                a.opportunities = newOTA.value.split('\n').map(s=>s.trim()).filter(Boolean);
-                a.futureRoles   = newNRTA.value.split('\n').map(s=>s.trim()).filter(Boolean);
+                a.strengths     = newSTA.value.split('\n').map(s => s.trim()).filter(Boolean);
+                a.opportunities = newOTA.value.split('\n').map(s => s.trim()).filter(Boolean);
+                a.futureRoles   = newNRTA.value.split('\n').map(s => s.trim()).filter(Boolean);
+                const experience = {};
+                expFields.forEach(function(f) { if (newExpCbs[f]) experience[f] = newExpCbs[f].checked; });
+                const experienceScores = {};
+                scoreFields.forEach(function(f) { if (newScoreSels[f]) experienceScores[f] = newScoreSels[f].value; });
                 localStorage.setItem(key, JSON.stringify({
-                    ...saved,
-                    strengths:      a.strengths,
-                    opportunities:  a.opportunities,
-                    futureRoles:    a.futureRoles,
-                    readiness:      newReadinessSel.value,
-                    projectedLevel: newProjLevelSel.value,
-                    devPrograms:    newDevProgramsTA.value
+                    strengths:        a.strengths,
+                    opportunities:    a.opportunities,
+                    futureRoles:      a.futureRoles,
+                    careerSummary:    newCareerSummaryTA.value,
+                    education:        newEducationEl.value,
+                    experience:       experience,
+                    experienceScores: experienceScores,
+                    readiness:        newReadinessSel.value,
+                    projectedLevel:   newProjLevelSel.value,
+                    devPrograms:      newDevProgramsTA.value
                 }));
                 const ind = document.getElementById('tc-save-indicator');
-                if (ind) { ind.style.opacity='1'; clearTimeout(ind._t); ind._t=setTimeout(()=>ind.style.opacity='0',1500); }
+                if (ind) { ind.style.opacity = '1'; clearTimeout(ind._t); ind._t = setTimeout(() => ind.style.opacity = '0', 1500); }
             }
+
+            newCareerSummaryTA.addEventListener('input', persist);
+            newEducationEl.addEventListener('input', persist);
             newReadinessSel.addEventListener('change', persist);
             newProjLevelSel.addEventListener('change', persist);
             newDevProgramsTA.addEventListener('input', persist);
             newSTA.addEventListener('input', persist);
             newOTA.addEventListener('input', persist);
             newNRTA.addEventListener('input', persist);
+            expFields.forEach(function(f) { if (newExpCbs[f]) newExpCbs[f].addEventListener('change', persist); });
+            scoreFields.forEach(function(f) { if (newScoreSels[f]) newScoreSels[f].addEventListener('change', persist); });
 
             tcOverlay.classList.add('open');
         }
