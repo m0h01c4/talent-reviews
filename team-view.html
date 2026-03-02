@@ -822,9 +822,128 @@
             .dist-label { width: 50px; font-size: 11px; }
             .dist-legend { margin-left: 0; }
         }
+        /* ── Sign-On Modal ── */
+        #signon-overlay {
+            display: flex;
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, var(--midnight-blue) 0%, var(--ux-blue) 100%);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        #signon-overlay.hidden { display: none; }
+        .signon-box {
+            background: #fff;
+            border-radius: 16px;
+            padding: 40px 36px 36px;
+            width: 380px;
+            max-width: 94vw;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.35);
+            text-align: center;
+        }
+        .signon-logo {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--midnight-blue);
+            letter-spacing: 0.04em;
+            margin-bottom: 4px;
+        }
+        .signon-subtitle {
+            font-size: 0.8rem;
+            color: var(--mid-gray);
+            margin-bottom: 28px;
+        }
+        .signon-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--midnight-blue);
+            text-align: left;
+            margin-bottom: 6px;
+        }
+        .signon-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid var(--border-gray);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: var(--midnight-blue);
+            outline: none;
+            transition: border-color 0.15s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .signon-input:focus { border-color: var(--primary-blue); }
+        .signon-btn {
+            margin-top: 18px;
+            width: 100%;
+            padding: 11px;
+            background: var(--primary-blue);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .signon-btn:hover { background: var(--sapphire-blue); }
+        .signon-error {
+            margin-top: 12px;
+            font-size: 0.82rem;
+            color: var(--error-red);
+            min-height: 1.2em;
+        }
     </style>
 </head>
 <body>
+    <!-- Sign-On Modal -->
+    <div id="signon-overlay">
+        <div class="signon-box">
+            <div class="signon-logo">Sam's Club Talent Review</div>
+            <div class="signon-subtitle">Enter your User ID to access the dashboard</div>
+            <label class="signon-label" for="signon-userid">User ID</label>
+            <input class="signon-input" type="text" id="signon-userid" placeholder="e.g. M0H01C4" maxlength="12" autocomplete="off" />
+            <button class="signon-btn" id="signon-btn">Sign In</button>
+            <div class="signon-error" id="signon-error"></div>
+        </div>
+    </div>
+    <script>
+        (function() {
+            var ALLOWED_IDS = new Set(["M0H01C4","C0A07J1","S0A09UO","JGONZ79","DLBLANC","ARBLUMA","A0B091S","K0B0DPK","A0B0K7I","TMANGAN","J0C0KD0","A0C0LTZ","M3COOPE","TGCOX","TDAVI38","JDODSO1","N0D00B1","E0D05EC","EPDUNCA","AMEDGEC","RELLIS2","C0E01M9","J0ENGEL","WUF000B","M0F00EX","H0F01QK","N0F008X","L2FOSTE","ALFOX","ADECHOL","JFRADEL","R9FRANC","EGOAD","A0H0I9I","S0H0H3V","K0H00SF","C0H0Q44","RHOLDEN","AHGUIDR","R0H0J8V","RWJ001T","JJJ0086","C0J0ATN","K0J0ELD","A0K0BRJ","A0K025C","A0L0LYH","E0L059A","D0LONG","KMAI2","AMARSH9","CAMCGRA","C0M0118","KMOSS","K0O02SY","R0O00TD","SEKINS","HPALME1","M0P00G2","B0P04M5","MPERE85","MEVENSO","J0P15UW","AAHOSTE","B0R020K","K0R0K1D","BMREICH","MAREID","T0R00BM","ERS000W","NSKIDMO","L4MAY","SKSRIVA","LWOODS2","KTHOM14","M0V04J3","LWADE","BPB000R","K0W0D6U","T0W0LXZ","YWARFIE","S0W0LS4","C0W06X5","K0W03JQ","S0W0BLO","AWOODS6","K0W0A2L"]);
+            var SESSION_KEY = 'talent_review_auth';
+            var overlay = document.getElementById('signon-overlay');
+            var input   = document.getElementById('signon-userid');
+            var btn     = document.getElementById('signon-btn');
+            var errEl   = document.getElementById('signon-error');
+
+            function authenticate() {
+                var uid = input.value.trim().toUpperCase();
+                if (ALLOWED_IDS.has(uid)) {
+                    sessionStorage.setItem(SESSION_KEY, uid);
+                    overlay.classList.add('hidden');
+                    errEl.textContent = '';
+                } else {
+                    errEl.textContent = 'Access denied. Your User ID was not found.';
+                    input.select();
+                }
+            }
+
+            if (sessionStorage.getItem(SESSION_KEY)) {
+                overlay.classList.add('hidden');
+            } else {
+                input.focus();
+            }
+
+            btn.addEventListener('click', authenticate);
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') authenticate();
+            });
+        })();
+    </script>
 
     <header class="page-header">
         <div class="header-content">
