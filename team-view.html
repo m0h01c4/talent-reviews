@@ -445,9 +445,9 @@
                     <div class="tc-section-label" style="margin-top:14px">Readiness:</div>
                     <select class="tc-mob-sel" id="tc-readiness" style="width:100%;margin-bottom:4px;">
                         <option value="">Select…</option>
-                        <option value="RN">RN</option>
-                        <option value="R1">R1</option>
-                        <option value="R2">R2</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3+">3+</option>
                     </select>
                     <div class="tc-section-label" style="margin-top:10px">Projected Achievable Level:</div>
                     <select class="tc-mob-sel" id="tc-projected-level" style="width:100%;margin-bottom:4px;">
@@ -628,6 +628,22 @@
                 document.getElementById('manager-select').selectedIndex=0;
                 render();
             });
+
+            // Apply filter values passed from the talent dashboard via URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlDept   = urlParams.get('dept');
+            const urlLevels = urlParams.get('levels');
+            if (urlDept && Array.from(deptSel.options).some(o => o.value === urlDept)) {
+                deptSel.value = urlDept;
+                refreshManagers();
+            }
+            if (urlLevels) {
+                const lvlArr = urlLevels.split(',');
+                lvlCheckboxes.forEach(cb => { cb.checked = lvlArr.includes(cb.value); });
+                const selected = [...lvlCheckboxes].filter(c => c.checked);
+                const labels = selected.map(c => c.parentElement.textContent.trim());
+                lvlToggle.textContent = labels.length ? labels.join(', ') : 'All Levels';
+            }
         }
 
         function getFiltered() {
