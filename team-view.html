@@ -790,6 +790,38 @@
         }
         .multi-select-option:hover { background-color: #f3f4f6; }
         .multi-select-option input[type="checkbox"] { accent-color: var(--primary-blue); }
+
+        /* ── Responsive / Mobile ── */
+        @media (max-width: 768px) {
+            .page-header { padding: 16px; }
+            .header-content { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .header-content h1 { font-size: 17px; }
+            .filters-bar { padding: 12px 16px; }
+            .filter-group { min-width: 140px; }
+            .dist-section { padding: 0 16px; }
+            .main-content { padding: 0 16px 32px; }
+            .dist-label { width: 55px; }
+            .dist-legend { margin-left: 0; }
+            .tc-body { grid-template-columns: 1fr; }
+            .tc-left { border-right: none; border-bottom: 1px solid var(--border-gray); }
+            .tc-stats-row { flex-wrap: wrap; }
+            .tc-stat-item { flex: 1 1 45%; border-right: none; border-bottom: 1px solid var(--border-gray); }
+            .tc-stat-item:last-child { border-bottom: none; }
+            .tc-header { flex-wrap: wrap; }
+            .tc-avatar { width: 64px; height: 64px; }
+            .tc-name { white-space: normal; }
+        }
+
+        @media (max-width: 480px) {
+            .page-header { padding: 12px; }
+            .header-content h1 { font-size: 15px; }
+            .filters-inner { flex-direction: column; gap: 8px; }
+            .filter-group { min-width: 100%; flex: none; }
+            .dist-section { padding: 0 12px; }
+            .main-content { padding: 0 12px 24px; }
+            .dist-label { width: 50px; font-size: 11px; }
+            .dist-legend { margin-left: 0; }
+        }
     </style>
 </head>
 <body>
@@ -802,7 +834,7 @@
                     <span id="override-count"></span> rating change(s) &middot; <span class="chip-x">&#10005; Reset</span>
                 </span>
             </div>
-            <div style="display:flex;gap:10px;align-items:center;">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                 <button class="btn-export" id="btn-export-edits">&#8595; Export Edits</button>
                 <button class="btn-export" id="btn-export-pptx">&#8595; Export Talent Cards</button>
                 <a href="index.html" class="btn-back">&#8592; Back to Dashboard</a>

@@ -1054,6 +1054,33 @@
             margin-top: -8px;
             padding-bottom: 8px;
         }
+
+        /* ── Responsive / Mobile ── */
+        @media (max-width: 768px) {
+            .page-header { padding: 20px 16px; }
+            .header-title h1 { font-size: 20px; }
+            .main-container { padding: 16px; }
+            .controls-section { padding: 16px; }
+            .stat-box { grid-template-columns: repeat(2, 1fr); }
+            .tc-body { grid-template-columns: 1fr; }
+            .tc-left { border-right: none; border-bottom: 1px solid var(--border-gray); }
+            .tc-stats-row { flex-wrap: wrap; }
+            .tc-stat-item { flex: 1 1 45%; border-right: none; border-bottom: 1px solid var(--border-gray); }
+            .tc-stat-item:last-child { border-bottom: none; }
+            .tc-header { flex-wrap: wrap; }
+            .tc-avatar { width: 64px; height: 64px; }
+            .tc-name { white-space: normal; }
+        }
+
+        @media (max-width: 480px) {
+            .page-header { padding: 16px 12px; }
+            .header-title h1 { font-size: 18px; }
+            .main-container { padding: 12px; }
+            .card__body { padding: 16px; }
+            .card__header { padding: 12px 16px; }
+            .controls-section { padding: 12px; }
+            .gauge-row { gap: 24px; padding: 20px 12px; }
+        }
     </style>
 </head>
 <body>
@@ -1161,9 +1188,9 @@
 
         <!-- Associates Table -->
         <div class="card">
-            <div class="card__header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="card__header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                 <h2>Associates</h2>
-                <div style="display:flex;gap:10px;">
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
                     <button class="btn btn--secondary" id="btn-export-edits" style="margin: -4px 0;">&#8595; Export Edits</button>
                     <button class="btn btn--secondary" id="btn-export-pptx" style="margin: -4px 0;">&#8595; Export Talent Cards</button>
                     <button class="btn btn--primary" onclick="openTeamView()" style="margin: -4px 0;">Team View</button>
@@ -1641,11 +1668,16 @@
             const canvas = document.getElementById('donut-chart');
             const ctx = canvas.getContext('2d');
             const dpr = window.devicePixelRatio || 1;
-            canvas.width = 700 * dpr;
-            canvas.height = 420 * dpr;
-            canvas.style.width = '700px';
-            canvas.style.height = '420px';
-            ctx.scale(dpr, dpr);
+            const chartPadding = 48; // card body padding (24px * 2 sides)
+            const containerW = canvas.parentElement ? canvas.parentElement.clientWidth - chartPadding : 700;
+            const chartScale = Math.min(1, containerW / 700);
+            const chartW = Math.round(700 * chartScale);
+            const chartH = Math.round(420 * chartScale);
+            canvas.width = chartW * dpr;
+            canvas.height = chartH * dpr;
+            canvas.style.width = chartW + 'px';
+            canvas.style.height = chartH + 'px';
+            ctx.scale(dpr * chartScale, dpr * chartScale);
             ctx.clearRect(0, 0, 700, 420);
             
             const centerX = 320;
