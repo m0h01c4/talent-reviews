@@ -1061,6 +1061,16 @@
                 const strengths     = saved.strengths     || a.strengths     || [];
                 const opportunities = saved.opportunities || a.opportunities || [];
                 const futureRoles   = saved.futureRoles   || a.futureRoles   || a.potentialNextRoles || [];
+                const careerSummary = saved.careerSummary || '';
+                const education     = saved.education     || '';
+                const readiness     = saved.readiness     || '';
+                const projectedLevel = saved.projectedLevel || '';
+                const devPrograms   = saved.devPrograms   || '';
+                const expLabels = { ecomm: 'eComm', technology: 'Technology', global: 'Global', merchandising: 'Merchandising', operations: 'Operations', cluster: 'Cluster', 'cross-segment': 'Cross-Segment' };
+                const experience = saved.experience || {};
+                const expText = Object.keys(expLabels).filter(f => experience[f]).map(f => expLabels[f]).join(', ') || '—';
+                const expScores = saved.experienceScores || {};
+                const expScoreText = `Func: ${expScores.functional||'—'}  |  Seg: ${expScores.segment||'—'}  |  Digital: ${expScores.digital||'—'}`;
 
                 let mobility = '';
                 if (a.mobilityLongTerm === 'Yes' && a.mobilityShortTerm === 'Yes') mobility = 'Global';
@@ -1108,6 +1118,10 @@
                     x: 1.75, y: 1.52, w: 7.5, h: 0.3,
                     fontSize: 10, color: '555555', fontFace: 'Calibri'
                 });
+                slide.addText(`Education: ${education || '—'}   |   Org: ${a.department || a.costCenter || '—'}`, {
+                    x: 1.75, y: 1.84, w: 7.5, h: 0.28,
+                    fontSize: 10, color: '555555', fontFace: 'Calibri'
+                });
                 slide.addShape(prs.ShapeType.line, { x: 0.18, y: 2.35, w: 12.97, h: 0, line: { color: BDGRAY, width: 0.75 } });
 
                 function sectionHeader(text, x, y, w) {
@@ -1134,21 +1148,52 @@
                         slide.addText(pr.val || 'N/A', { x: 4.6, y: yPos, w: 2.3, h: 0.3, fontSize: 9, bold: true, color: ratingTextColor(pr.val, true), fontFace: 'Calibri', align: 'center', valign: 'middle' });
                     });
 
+                // ── Left area extra: READINESS + PROJECTED LEVEL + EXPERIENCE ──
+                const tvLeftExtraY = 2.75 + 2 * 0.42 + 0.30 + 0.18; // after last rating row
+                slide.addText('READINESS', { x: 0.18, y: tvLeftExtraY, w: 1.3, h: 0.18, fontSize: 7, bold: true, color: '7C878E', fontFace: 'Calibri' });
+                slide.addText(readiness || '—', { x: 0.18, y: tvLeftExtraY + 0.20, w: 1.3, h: 0.26, fontSize: 10, bold: true, color: MIDNIGHT, fontFace: 'Calibri' });
+                slide.addText('PROJECTED LEVEL', { x: 1.62, y: tvLeftExtraY, w: 1.8, h: 0.18, fontSize: 7, bold: true, color: '7C878E', fontFace: 'Calibri' });
+                slide.addText(projectedLevel || '—', { x: 1.62, y: tvLeftExtraY + 0.20, w: 1.8, h: 0.26, fontSize: 10, bold: true, color: MIDNIGHT, fontFace: 'Calibri' });
+                const tvExpStartY = tvLeftExtraY + 0.58;
+                slide.addText('EXPERIENCE', { x: 0.18, y: tvExpStartY, w: 6.8, h: 0.18, fontSize: 7, bold: true, color: '7C878E', fontFace: 'Calibri' });
+                slide.addText(expText, { x: 0.18, y: tvExpStartY + 0.20, w: 6.8, h: 0.26, fontSize: 8, color: MIDNIGHT, fontFace: 'Calibri', wrap: true });
+                const tvScoreStartY = tvExpStartY + 0.56;
+                slide.addText('EXP SCORES (1=Red · 2=Yellow · 3=Green)', { x: 0.18, y: tvScoreStartY, w: 6.8, h: 0.18, fontSize: 7, bold: true, color: '7C878E', fontFace: 'Calibri' });
+                slide.addText(expScoreText, { x: 0.18, y: tvScoreStartY + 0.20, w: 6.8, h: 0.26, fontSize: 9, bold: true, color: MIDNIGHT, fontFace: 'Calibri' });
+
                 slide.addShape(prs.ShapeType.line, { x: 7.2, y: 2.42, w: 0, h: 5.0, line: { color: BDGRAY, width: 0.75 } });
 
-                sectionHeader('STRENGTHS', 7.38, 2.42, 5.7);
+                // ── Right panel: CAREER SUMMARY ──
+                const tvCsY = 2.42;
+                sectionHeader('CAREER SUMMARY', 7.38, tvCsY, 5.7);
+                slide.addShape(prs.ShapeType.rect, { x: 7.38, y: tvCsY + 0.28, w: 5.7, h: 0.50, fill: { color: 'F9FAFB' }, line: { color: BDGRAY, width: 0.5 } });
+                slide.addText(careerSummary || '—', { x: 7.50, y: tvCsY + 0.32, w: 5.46, h: 0.42, fontSize: 9, color: '333333', fontFace: 'Calibri', valign: 'top', wrap: true });
+
+                // ── Right panel: DEVELOPMENT PROGRAMS ──
+                const tvDpY = tvCsY + 0.88;
+                sectionHeader('DEVELOPMENT PROGRAMS', 7.38, tvDpY, 5.7);
+                slide.addShape(prs.ShapeType.rect, { x: 7.38, y: tvDpY + 0.28, w: 5.7, h: 0.50, fill: { color: 'F9FAFB' }, line: { color: BDGRAY, width: 0.5 } });
+                slide.addText(devPrograms || '—', { x: 7.50, y: tvDpY + 0.32, w: 5.46, h: 0.42, fontSize: 9, color: '333333', fontFace: 'Calibri', valign: 'top', wrap: true });
+
+                // ── Right panel: STRENGTHS ──
+                const tvStrY = tvDpY + 0.88;
+                sectionHeader('STRENGTHS', 7.38, tvStrY, 5.7);
                 slide.addText(strengths.length ? strengths.map(s => `• ${s}`).join('\n') : '—', {
-                    x: 7.38, y: 2.75, w: 5.7, h: 1.45, fontSize: 10, color: '333333', fontFace: 'Calibri', valign: 'top', wrap: true
+                    x: 7.38, y: tvStrY + 0.30, w: 5.7, h: 0.80, fontSize: 10, color: '333333', fontFace: 'Calibri', valign: 'top', wrap: true
                 });
 
-                sectionHeader('OPPORTUNITIES / DEVELOPMENT FOCUS', 7.38, 4.28, 5.7);
+                // ── Right panel: OPPORTUNITIES ──
+                const tvOppsY = tvStrY + 1.18;
+                sectionHeader('OPPORTUNITIES / DEVELOPMENT FOCUS', 7.38, tvOppsY, 5.7);
                 slide.addText(opportunities.length ? opportunities.map(o => `• ${o}`).join('\n') : '—', {
-                    x: 7.38, y: 4.6, w: 5.7, h: 1.3, fontSize: 10, color: '333333', fontFace: 'Calibri', valign: 'top', wrap: true
+                    x: 7.38, y: tvOppsY + 0.30, w: 5.7, h: 0.70, fontSize: 10, color: '333333', fontFace: 'Calibri', valign: 'top', wrap: true
                 });
 
-                sectionHeader('POTENTIAL NEXT ROLES', 7.38, 6.0, 5.7);
+                // ── Right panel: POTENTIAL NEXT ROLES ──
+                const tvRolesY = tvOppsY + 1.08;
+                sectionHeader('POTENTIAL NEXT ROLES', 7.38, tvRolesY, 5.7);
                 slide.addText(futureRoles.length ? futureRoles.map(r => `• ${r}`).join('\n') : '—', {
-                    x: 7.38, y: 6.3, w: 5.7, h: 0.9, fontSize: 10, color: '333333', fontFace: 'Calibri', valign: 'top', wrap: true
+                    x: 7.38, y: tvRolesY + 0.30, w: 5.7, h: 0.58, fontSize: 10, color: '333333', fontFace: 'Calibri', valign: 'top', wrap: true
                 });
 
                 slide.addShape(prs.ShapeType.rect, { x: 0, y: 7.3, w: '100%', h: 0.2, fill: { color: PRIMARY } });
