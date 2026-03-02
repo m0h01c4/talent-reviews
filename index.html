@@ -1237,6 +1237,7 @@
                             <label class="multi-select-option"><input type="checkbox" value="E"> E - Senior Director</label>
                             <label class="multi-select-option"><input type="checkbox" value="F"> F - Director</label>
                             <label class="multi-select-option"><input type="checkbox" value="G"> G - Senior Manager</label>
+                            <label class="multi-select-option"><input type="checkbox" value="H"> H - Manager</label>
                         </div>
                     </div>
                 </div>
@@ -1654,6 +1655,8 @@
                 const seen = new Set();
                 allData = [];
                 raw.forEach(d => { if (!seen.has(d.win)) { seen.add(d.win); allData.push(d); } });
+                // Restrict to associates at levels D through H (Group Director through Manager)
+                allData = allData.filter(d => ['D','E','F','G','H'].includes(d.managementLevel));
                 console.log(`Data loaded: ${allData.length} records (${raw.length - allData.length} duplicates removed)`);
                 
                 if (allData.length === 0) {
@@ -1923,6 +1926,7 @@
                 {code: 'E', title: 'Senior Director'},
                 {code: 'F', title: 'Director'},
                 {code: 'G', title: 'Senior Manager'},
+                {code: 'H', title: 'Manager'},
             ];
             const gaugeColor = {
                 'High Potential': '#7AB648',

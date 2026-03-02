@@ -981,6 +981,7 @@
                         <label class="multi-select-option"><input type="checkbox" value="E"> E - Senior Director</label>
                         <label class="multi-select-option"><input type="checkbox" value="F"> F - Director</label>
                         <label class="multi-select-option"><input type="checkbox" value="G"> G - Senior Manager</label>
+                        <label class="multi-select-option"><input type="checkbox" value="H"> H - Manager</label>
                     </div>
                 </div>
             </div>
@@ -1266,6 +1267,8 @@
                 const raw = await r.json();
                 const seen = new Set();
                 raw.forEach(d => { if (!seen.has(d.win)) { seen.add(d.win); allData.push(d); } });
+                // Restrict to associates at levels D through H (Group Director through Manager)
+                allData = allData.filter(d => ['D','E','F','G','H'].includes(d.managementLevel));
                 loadRatingOverrides();
                 populateFilters();
                 render();
