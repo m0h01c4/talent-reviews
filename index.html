@@ -1352,9 +1352,9 @@
                     <div class="tc-section-label">Readiness</div>
                     <select class="form-select" id="tc-readiness" style="width:100%;margin-bottom:4px;">
                         <option value="">Select…</option>
-                        <option value="RN">RN</option>
-                        <option value="R1">R1</option>
-                        <option value="R2">R2</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3+">3+</option>
                     </select>
                     <div class="tc-section-label">Projected Achievable Level</div>
                     <select class="form-select" id="tc-projected-level" style="width:100%;margin-bottom:4px;">
@@ -1390,7 +1390,13 @@
         const TV_RATING_OVERRIDES_KEY = 'tv_rating_overrides';
 
         function openTeamView() {
-            window.open('team-view.html', '_blank');
+            const dept   = document.getElementById('filter-department').value;
+            const levels = Array.from(document.querySelectorAll('#filter-level-dropdown input:checked')).map(cb => cb.value);
+            const params = new URLSearchParams();
+            if (dept)           params.set('dept', dept);
+            if (levels.length)  params.set('levels', levels.join(','));
+            const url = 'team-view.html' + (params.toString() ? '?' + params.toString() : '');
+            window.open(url, '_blank');
         }
 
         function exportEditsToExcel() {
