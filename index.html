@@ -1405,7 +1405,7 @@
                 const ratingOverride = ratingOverrides[a.win];
 
                 // Only include if at least one field was edited
-                const hasEdits = saved.strengths?.length || saved.opportunities?.length || saved.futureRoles?.length || saved.mobilityOverride || ratingOverride || saved.readiness || saved.projectedLevel || saved.devPrograms;
+                const hasEdits = saved.strengths?.length || saved.opportunities?.length || saved.futureRoles?.length || saved.mobilityOverride || ratingOverride || saved.readiness || saved.projectedLevel || saved.devPrograms || saved.careerSummary || saved.education || saved.experience;
                 if (!hasEdits) return;
 
                 // Mobility display
@@ -1417,19 +1417,33 @@
                 // Override if user set it manually
                 if (saved.mobilityOverride) mobility = saved.mobilityOverride;
 
+                const expLabels = { ecomm: 'eComm', technology: 'Technology', global: 'Global', merchandising: 'Merchandising', operations: 'Operations', cluster: 'Cluster', 'cross-segment': 'Cross-Segment' };
+                const experience = saved.experience || {};
+                const expText = Object.keys(expLabels).filter(f => experience[f]).map(f => expLabels[f]).join(', ') || '';
+                const expScores = saved.experienceScores || {};
+                const expScoreText = [
+                    expScores.functional ? `Functional: ${expScores.functional}` : '',
+                    expScores.segment    ? `Segment: ${expScores.segment}` : '',
+                    expScores.digital    ? `Digital: ${expScores.digital}` : ''
+                ].filter(Boolean).join(' | ');
+
                 rows.push({
                     'Name':              a.name || '',
                     'Title':             a.jobProfile || '',
                     'Department':        a.department || '',
                     'Level':             `${a.managementLevel} - ${a.managementLevelTitle}`,
                     'Current Rating':    ratingOverride || a.rating || '',
+                    'Career Summary':    saved.careerSummary || '',
+                    'Education':         saved.education || '',
                     'Readiness':         saved.readiness || '',
                     'Projected Achievable Level': saved.projectedLevel || '',
                     'Development Programs': saved.devPrograms || '',
                     'Strengths':         (saved.strengths || []).join('\n'),
                     'Opportunities':     (saved.opportunities || []).join('\n'),
                     'Potential Next Roles': (saved.futureRoles || []).join('\n'),
-                    'Mobility':          mobility
+                    'Mobility':          mobility,
+                    'Experience':        expText,
+                    'Experience Scores': expScoreText
                 });
             });
 
@@ -1448,6 +1462,8 @@
                 { wch: 22 }, // Department
                 { wch: 22 }, // Level
                 { wch: 22 }, // Current Rating
+                { wch: 50 }, // Career Summary
+                { wch: 30 }, // Education
                 { wch: 12 }, // Readiness
                 { wch: 24 }, // Projected Achievable Level
                 { wch: 40 }, // Development Programs
@@ -1455,6 +1471,8 @@
                 { wch: 40 }, // Opportunities
                 { wch: 40 }, // Potential Next Roles
                 { wch: 16 }, // Mobility
+                { wch: 40 }, // Experience
+                { wch: 40 }, // Experience Scores
             ];
 
             XLSX.utils.book_append_sheet(wb, ws, 'Talent Card Edits');
@@ -2402,6 +2420,9 @@
                 strengthsTA.parentNode.replaceChild(newStrengthsTA, strengthsTA);
                 oppsTA.parentNode.replaceChild(newOppsTA, oppsTA);
                 nextRolesTA.parentNode.replaceChild(newNextRolesTA, nextRolesTA);
+                // Re-apply select values after clone (cloneNode may not preserve JS-set select state)
+                newReadinessSel.value  = saved.readiness || '';
+                newProjLevelSel.value  = saved.projectedLevel || '';
 
                 // Re-bind experience checkbox clones
                 const newExpCbs = {};
@@ -2420,6 +2441,8 @@
                     if (!orig) return;
                     const clone = orig.cloneNode(true);
                     orig.parentNode.replaceChild(clone, orig);
+                    // Re-apply value after clone
+                    clone.value = (saved.experienceScores && saved.experienceScores[f]) || '';
                     newScoreSels[f] = clone;
                 });
 
